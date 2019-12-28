@@ -9,6 +9,11 @@ namespace m039.Common
     {
         static public void DestroyAllChildren(Transform transform)
         {
+            if (transform == null)
+            {
+                return;
+            }
+
             var toDestroy = new List<GameObject>();
 
             for (int i = 0; i < transform.childCount; i++)
