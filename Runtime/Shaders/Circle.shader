@@ -72,8 +72,6 @@
                 #endif
                 }
 
-
-
                 return fixed4(i.color.rgb * i.color.a * alpha, alpha * i.color.a);
             }
             ENDCG
