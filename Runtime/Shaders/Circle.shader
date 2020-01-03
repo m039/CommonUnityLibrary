@@ -1,4 +1,4 @@
-﻿Shader "Unlit/Circle"
+Shader "Unlit/Circle"
 {
     Properties
     {
@@ -9,13 +9,11 @@
     SubShader
     {
         Tags {
-        	"Queue"="Transparent" 
+            "Queue"="Transparent" 
         	"RenderType"="Transparent" 
     	}
 
-
         LOD 100
-
 
         Blend One OneMinusSrcAlpha
 
@@ -33,13 +31,13 @@
             struct appdata
             {
                 float4 vertex 	: POSITION;
-                float2 uv 		: TEXCOORD0;
+                float2 uv 	    : TEXCOORD0;
                 float4 color    : COLOR;
             };
 
             struct v2f
             {
-                float2 uv 		: TEXCOORD0;
+                float2 uv 	    : TEXCOORD0;
                 float4 vertex 	: SV_POSITION;
                 float4 color	: COLOR;
             };
@@ -57,10 +55,10 @@
 
             fixed4 frag (v2f i) : SV_Target
             {
-				float alpha = 1;
-				float2 c = float2(0.0, 0.0);
-				float2 p = float2(i.uv.x - 0.5, i.uv.y - 0.5);
-				float d = distance(c, p);
+		        float alpha = 1;
+		        float2 c = float2(0.0, 0.0);
+		        float2 p = float2(i.uv.x - 0.5, i.uv.y - 0.5);
+		        float d = distance(c, p);
 				
                 if (d > 0.5) {
                 	alpha = 0;
