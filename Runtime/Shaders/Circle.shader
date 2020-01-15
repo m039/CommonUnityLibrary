@@ -2,7 +2,6 @@ Shader "Unlit/Circle"
 {
     Properties
     {
-    	// Nothing
     	_BorderSize ("Border Size", float) = 0
     	[Toggle(USE_SOLID)] _Solid ("Solid", float)  = 0
     }
