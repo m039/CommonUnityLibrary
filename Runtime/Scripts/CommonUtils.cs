@@ -23,6 +23,11 @@ namespace m039.Common
 
 			toDestroy.ForEach((obj) => GameObject.DestroyImmediate(obj));
 		}
+
+        static public bool IsNull(object o)
+        {
+            return o == null;
+        }
 	}
 
 }
