@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.Versioning;
 using UnityEngine;
 
 namespace m039.Common
@@ -38,13 +40,34 @@ namespace m039.Common
                         // Create new instance if one doesn't already exist.
                         if (instance == null)
                         {
-                            // Need to create a new GameObject to attach the singleton to.
+                            // To use virtual functions of SingletonMonoBehaviour we need an instance of GameObject.
                             var singletonObject = new GameObject();
                             instance = singletonObject.AddComponent<T>();
                             singletonObject.name = typeof(T).ToString() + " (Singleton)";
 
                             if (instance.ShouldCreateIfNotExist)
                             {
+                                // The signleton can be loaded from an asset stored in the Resources folder;
+                                if (instance.UseResourceFolder && !string.IsNullOrEmpty(instance.PathToResource))
+                                {
+                                    var newSingletonObject = Resources.Load<GameObject>(instance.PathToResource);
+                                    var newInstance = newSingletonObject == null ? null : newSingletonObject.GetComponent<T>();
+
+                                    if (newSingletonObject != null && newInstance != null)
+                                    {  
+                                        newSingletonObject.name = singletonObject.name;
+                                        DestroyImmediate(singletonObject);
+
+                                        singletonObject = Instantiate(newSingletonObject);
+                                        instance = newInstance;
+                                    } else if (newSingletonObject != null)
+                                    {
+                                        DestroyImmediate(newSingletonObject);
+                                    }
+                                }
+
+                                instance.OnSingletonCreated();
+
                                 // Make instance persistent.
 
                                 if (!instance.ShouldDestroyOnLoad)
@@ -69,14 +92,25 @@ namespace m039.Common
             }
         }
 
+        /// <summary>
+        /// This function is called when a singleton is created when no one exists.
+        /// </summary>
+        protected virtual void OnSingletonCreated()
+        {
+        }
+
         protected virtual void OnDestroy()
         {
             _sInstance = null;
         }
 
-        public virtual bool ShouldDestroyOnLoad => true;
+        protected virtual string PathToResource => null;
 
-        public virtual bool ShouldCreateIfNotExist => true;
+        protected virtual bool UseResourceFolder => false;
+
+        protected virtual bool ShouldDestroyOnLoad => true;
+
+        protected virtual bool ShouldCreateIfNotExist => true;
     }
 
     public class SingeltonMonoBehaviour<T, I> : SingletonMonoBehaviour<T> where T : SingeltonMonoBehaviour<T, I>, I
