@@ -14,6 +14,8 @@ namespace m039.Common
     {
         private static T _sInstance;
 
+        private static bool _sIsDestroying;
+
         private static object _sLock = new object();
 
         /// <summary>
@@ -32,7 +34,7 @@ namespace m039.Common
                         return null;
                     }
 
-                    if (instance == null)
+                    if (instance == null && !_sIsDestroying)
                     {
                         // Search for existing instance.
                         instance = (T)FindObjectOfType(typeof(T));
@@ -51,15 +53,15 @@ namespace m039.Common
                                 if (instance.UseResourceFolder && !string.IsNullOrEmpty(instance.PathToResource))
                                 {
                                     var newSingletonObject = Resources.Load<GameObject>(instance.PathToResource);
-                                    var newInstance = newSingletonObject == null ? null : newSingletonObject.GetComponent<T>();
-
-                                    if (newSingletonObject != null && newInstance != null)
-                                    {  
-                                        newSingletonObject.name = singletonObject.name;
+                                    if (newSingletonObject != null && newSingletonObject.GetComponent<T>() != null)
+                                    {
+                                        var name = singletonObject.name;
                                         DestroyImmediate(singletonObject);
 
                                         singletonObject = Instantiate(newSingletonObject);
-                                        instance = newInstance;
+                                        singletonObject.name = name;
+                                        instance = singletonObject.GetComponent<T>();
+
                                     } else if (newSingletonObject != null)
                                     {
                                         DestroyImmediate(newSingletonObject);
@@ -101,12 +103,18 @@ namespace m039.Common
 
         protected virtual void OnDestroy()
         {
-            _sInstance = null;
+            if (ShouldDestroyOnLoad)
+            {
+                _sInstance = null;
+            } else
+            {
+                _sIsDestroying = true;
+            }
         }
 
-        protected virtual string PathToResource => null;
-
         protected virtual bool UseResourceFolder => false;
+
+        protected virtual string PathToResource => null;
 
         protected virtual bool ShouldDestroyOnLoad => true;
 
