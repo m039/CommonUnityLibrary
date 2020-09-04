@@ -8,13 +8,14 @@ namespace m039.Common
 {
     /// <summary>
     /// Inherit from this base class to create a singleton.
-    /// e.g. public class MyClassName : Singleton<MyClassName> {}
+    /// e.g. public class MyClassName : SingletonMonoBehaviour<MyClassName> {}
     /// </summary>
     public class SingletonMonoBehaviour<T> : MonoBehaviour where T : SingletonMonoBehaviour<T>
     {
         private static T _sInstance;
 
-        private static bool _sIsDestroying;
+        /// This flag is needed to prevent creating GameObjects when a scene is closed.
+        private static bool _sIsDestroying; 
 
         private static object _sLock = new object();
 
@@ -42,45 +43,23 @@ namespace m039.Common
                         // Create new instance if one doesn't already exist.
                         if (instance == null)
                         {
-                            // To use virtual functions of SingletonMonoBehaviour we need an instance of GameObject.
-                            var singletonObject = new GameObject();
-                            instance = singletonObject.AddComponent<T>();
-                            singletonObject.name = typeof(T).ToString() + " (Singleton)";
+                            // We need proxyObject and proxy only for virtual functions.
+                            var proxyObject = new GameObject();
+                            var proxy = proxyObject.AddComponent<T>();
 
-                            if (instance.ShouldCreateIfNotExist)
+                            if (proxy.ShouldCreateIfNotExist)
                             {
-                                // The signleton can be loaded from an asset stored in the Resources folder;
-                                if (instance.UseResourceFolder && !string.IsNullOrEmpty(instance.PathToResource))
-                                {
-                                    var newSingletonObject = Resources.Load<GameObject>(instance.PathToResource);
-                                    if (newSingletonObject != null && newSingletonObject.GetComponent<T>() != null)
-                                    {
-                                        var name = singletonObject.name;
-                                        DestroyImmediate(singletonObject);
-
-                                        singletonObject = Instantiate(newSingletonObject);
-                                        singletonObject.name = name;
-                                        instance = singletonObject.GetComponent<T>();
-
-                                    } else if (newSingletonObject != null)
-                                    {
-                                        DestroyImmediate(newSingletonObject);
-                                    }
-                                }
-
-                                instance.OnSingletonCreated();
+                                instance = proxy.CreateInstance();
+                                instance.OnCreateInstance();
 
                                 // Make instance persistent.
-
-                                if (!instance.ShouldDestroyOnLoad)
+                                if (!proxy.ShouldDestroyOnLoad)
                                 {
-                                    DontDestroyOnLoad(singletonObject);
+                                    DontDestroyOnLoad(instance.gameObject);
                                 }
-
-                            } else
-                            {
-                                DestroyImmediate(singletonObject);
                             }
+
+                            DestroyImmediate(proxyObject);
                         }
                     }
 
@@ -94,10 +73,17 @@ namespace m039.Common
             }
         }
 
-        /// <summary>
-        /// This function is called when a singleton is created when no one exists.
-        /// </summary>
-        protected virtual void OnSingletonCreated()
+        protected virtual T CreateInstance()
+        {
+            var obj = new GameObject();
+            var instance = obj.AddComponent<T>();
+
+            obj.name = typeof(T).Name + " (Singleton)";
+
+            return instance;
+        }
+
+        protected virtual void OnCreateInstance()
         {
         }
 
@@ -111,10 +97,6 @@ namespace m039.Common
                 _sIsDestroying = true;
             }
         }
-
-        protected virtual bool UseResourceFolder => false;
-
-        protected virtual string PathToResource => null;
 
         protected virtual bool ShouldDestroyOnLoad => true;
 

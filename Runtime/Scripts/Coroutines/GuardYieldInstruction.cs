@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace m039.Common
 {
@@ -12,7 +12,7 @@ namespace m039.Common
             _keep = true;
         }
 
-        public void Reset()
+        public void Restart()
         {
             _keep = false;
         }

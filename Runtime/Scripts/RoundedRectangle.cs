@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,8 +21,12 @@ namespace m039.Common
 
         public float borderRadius = 0;
 
+        #pragma warning disable 0649
+
         [SerializeField]
         Material _material;
+
+        #pragma warning restore 0649
 
         #endregion
 
