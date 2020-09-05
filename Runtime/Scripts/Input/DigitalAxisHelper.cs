@@ -6,12 +6,11 @@ namespace m039.Common
 {
 
     /// <summary>
-    /// A class that helps use button or key presses like axes
+    /// A class that helps to use button or key presses like axes
     /// which changes gradually over time based on gravity and sensitivity settings.
     /// 
     /// The idea is borrowed from here <see href="https://guavaman.com/projects/rewired/docs/RewiredEditor.html"/>.
     /// </summary>
-    [System.Serializable]
     public class DigitalAxisHelper
     {
         #region Inspector
