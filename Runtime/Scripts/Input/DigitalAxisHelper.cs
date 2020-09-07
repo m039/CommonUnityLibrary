@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace m039.Common
 {
-
     /// <summary>
     /// A class that helps to use button or key presses like axes
     /// which changes gradually over time based on gravity and sensitivity settings.
@@ -13,13 +12,15 @@ namespace m039.Common
     /// </summary>
     public class DigitalAxisHelper
     {
-        #region Inspector
+        public delegate T GetSettingValue<T>();
 
-        public bool snap = true;
+        #region Settings
 
-        public float gravity = 3;
+        public GetSettingValue<bool> snap = () => true;
 
-        public float sensitivity = 3;
+        public GetSettingValue<float> gravity = () => 3;
+
+        public GetSettingValue<float> sensitivity = () => 3;
 
         #endregion
 
@@ -38,13 +39,13 @@ namespace m039.Common
 
             // If snapping is enabled, reset the axis value.
 
-            if (snap && _value != _valuePrevious)
+            if (snap() && _value != _valuePrevious)
             {
                 _axisValue = 0;
             }
 
-            var dg = Time.deltaTime * gravity;
-            var ds = Time.deltaTime * sensitivity;
+            var dg = Time.deltaTime * gravity();
+            var ds = Time.deltaTime * sensitivity();
 
             float getValue(float buttonValue, float axis)
             {
