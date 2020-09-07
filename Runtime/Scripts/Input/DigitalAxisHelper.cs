@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 namespace m039.Common
@@ -37,9 +38,9 @@ namespace m039.Common
                 return;
             }
 
-            // If snapping is enabled, reset the axis value.
+            // If snapping is enabled, reset the axis value if the player pressed an opposite key.
 
-            if (snap() && _value != _valuePrevious)
+            if (snap() && Mathf.Sign(_value) != Mathf.Sign(_valuePrevious))
             {
                 _axisValue = 0;
             }
@@ -74,7 +75,22 @@ namespace m039.Common
                 }
                 else
                 {
-                    value = Mathf.Clamp(axis + Mathf.Sign(buttonValue) * ds, -1f, 1f);
+                    var direction = Mathf.Sign(buttonValue - axis);
+                    value = axis + direction * ds;
+
+                    if (direction > 0)
+                    {
+                        if (value > buttonValue)
+                        {
+                            value = buttonValue;
+                        }
+                    } else
+                    {
+                        if (value < buttonValue)
+                        {
+                            value = buttonValue;
+                        }
+                    }
                 }
 
                 return value;
