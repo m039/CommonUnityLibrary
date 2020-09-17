@@ -103,7 +103,7 @@ namespace m039.Common
         protected virtual bool ShouldCreateIfNotExist => true;
     }
 
-    public class SingeltonMonoBehaviour<T, I> : SingletonMonoBehaviour<T> where T : SingeltonMonoBehaviour<T, I>, I
+    public class SingletonMonoBehaviour<T, I> : SingletonMonoBehaviour<T> where T : SingletonMonoBehaviour<T, I>, I
     {
         public new static I Instance => SingletonMonoBehaviour<T>.Instance;
     }
