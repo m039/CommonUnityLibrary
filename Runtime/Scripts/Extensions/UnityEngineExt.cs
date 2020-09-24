@@ -50,6 +50,12 @@ namespace m039.Common
             vector.z = z;
             return vector;
         }
+
+        public static string ToStringVerbose(this Vector3 vector, int precision = 3)
+        {
+            var formatString = "F" + precision;
+            return string.Format($"({{0:{formatString}}}, {{1:{formatString}}}, {{2:{formatString}}})", vector.x, vector.y, vector.z);
+        }
     }
 
 }
