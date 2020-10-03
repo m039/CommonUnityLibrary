@@ -49,6 +49,14 @@ namespace m039.Common
             return false;
         }
 
+        public static void ForEach<T>(this IEnumerable<T> source, System.Action<T> action)
+        {
+            if (source == null || action == null)
+                return;
+
+            foreach (var item in source)
+                action(item);
+        }
     }
 
 }
