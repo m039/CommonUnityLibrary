@@ -109,6 +109,11 @@ namespace m039.Common
         {
             return _axisValue;
         }
+
+        public void SetAxis(float value)
+        {
+            _axisValue = value;
+        }
     }
 
 }
