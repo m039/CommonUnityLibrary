@@ -19,7 +19,7 @@ namespace m039.Common
 
             readonly List<List<string>> _result = new List<List<string>>();
 
-            readonly List<string> _line = new List<string>();
+            List<string> _line;
 
             readonly StringBuilder _buffer = new StringBuilder();
 
@@ -32,7 +32,7 @@ namespace m039.Common
                 char c2;
                 ParsingMode mode = ParsingMode.OutQuote;
                 bool requireTrimLineHead = false;
-                var isBlank = new Regex(@"\s");
+                var isBlank = new Regex(@" "); // TODO
 
                 for (int i = 0; i < length - 1; i++)
                 {
@@ -69,7 +69,7 @@ namespace m039.Common
 
                                 _line.Add(_buffer.ToString());
                                 _result.Add(_line);
-                                _line.Clear();
+                                _line = new List<string>();
                                 _buffer.Clear();
                                 i++; // Skip next iteration.
 
@@ -81,7 +81,7 @@ namespace m039.Common
 
                                 _line.Add(_buffer.ToString());
                                 _result.Add(_line);
-                                _line.Clear();
+                                _line = new List<string>();
                                 _buffer.Clear();
 
                                 requireTrimLineHead = true;
@@ -153,7 +153,7 @@ namespace m039.Common
             void Init()
             {
                 _result.Clear();
-                _line.Clear();
+                _line = new List<string>(); 
                 _buffer.Clear();
             }
         }
