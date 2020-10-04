@@ -65,7 +65,7 @@ namespace m039.Common
         /// <summary>
         /// Appear the canvas group.
         /// </summary>
-        public IEnumerator FadeSceneOut()
+        public IEnumerator FadeOut()
         {
             _CanvasGroup.gameObject.SetActive(true);
             yield return StartCoroutine(Fade(_CanvasGroup.alpha, 1, _CanvasGroup, _FadeOutDuration, _FadeOutCurve));
@@ -74,8 +74,9 @@ namespace m039.Common
         /// <summary>
         /// Disappear the canvas group.
         /// </summary>
-        public IEnumerator FadeSceneIn()
+        public IEnumerator FadeIn()
         {
+            _CanvasGroup.gameObject.SetActive(true);
             yield return StartCoroutine(Fade(_CanvasGroup.alpha, 0, _CanvasGroup, _FadeInDuration, _FadeInCurve));
             _CanvasGroup.gameObject.SetActive(false);
         }
