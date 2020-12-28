@@ -1,12 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace m039.Common
 {
 
     public static class CollectionExt
     {
-
         static public System.Nullable<T> Find<T>(this IList<T> list, System.Func<T, bool> predicate) where T : struct
         {
             if (list == null || predicate == null)
@@ -56,6 +56,27 @@ namespace m039.Common
 
             foreach (var item in source)
                 action(item);
+        }
+
+        public static void Shuffle<T>(this IList<T> list)
+        {
+            if (list == null)
+                return;
+
+            var n = list.Count;
+
+            while (n > 1)
+            {
+                n--;
+                var k = Random.Range(0, n + 1);
+
+                if (n != k)
+                {
+                    T tmp = list[k];
+                    list[k] = list[n];
+                    list[n] = tmp;
+                }
+            }
         }
     }
 
