@@ -42,6 +42,8 @@ namespace m039.Common
 
         IEnumerator Fade(float startAlpha, float finalAlpha, CanvasGroup canvasGroup, float duration, AnimationCurve curve)
         {
+            var previousBlocksRaycasts = canvasGroup.blocksRaycasts;
+
             IsFading = true;
             canvasGroup.blocksRaycasts = true;
 
@@ -58,26 +60,26 @@ namespace m039.Common
             }
 
             canvasGroup.alpha = finalAlpha;
-            canvasGroup.blocksRaycasts = false;
+            canvasGroup.blocksRaycasts = previousBlocksRaycasts;
             IsFading = false;
         }
 
         /// <summary>
         /// Appear the canvas group.
         /// </summary>
-        public IEnumerator FadeOut()
+        public IEnumerator FadeOut(float startAlpha = float.NaN)
         {
             _CanvasGroup.gameObject.SetActive(true);
-            yield return StartCoroutine(Fade(_CanvasGroup.alpha, 1, _CanvasGroup, _FadeOutDuration, _FadeOutCurve));
+            yield return StartCoroutine(Fade(float.IsNaN(startAlpha)? _CanvasGroup.alpha : startAlpha, 1, _CanvasGroup, _FadeOutDuration, _FadeOutCurve));
         }
 
         /// <summary>
         /// Disappear the canvas group.
         /// </summary>
-        public IEnumerator FadeIn()
+        public IEnumerator FadeIn(float startAlpha = float.NaN)
         {
             _CanvasGroup.gameObject.SetActive(true);
-            yield return StartCoroutine(Fade(_CanvasGroup.alpha, 0, _CanvasGroup, _FadeInDuration, _FadeInCurve));
+            yield return StartCoroutine(Fade(float.IsNaN(startAlpha) ? _CanvasGroup.alpha : startAlpha, 0, _CanvasGroup, _FadeInDuration, _FadeInCurve));
             _CanvasGroup.gameObject.SetActive(false);
         }
 
