@@ -1,8 +1,6 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Runtime.Versioning;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace m039.Common
 {
@@ -20,6 +18,12 @@ namespace m039.Common
         private static object _sLock = new object();
 
         /// <summary>
+        /// Which scenes don't have this kind of singleton.
+        /// To prevent some objects from constantly spawning.
+        /// </summary>
+        static BitArray _sScenesToSkip;
+
+        /// <summary>
         /// Access singleton instance through this propriety.
         /// </summary>
         public static T Instance
@@ -35,7 +39,7 @@ namespace m039.Common
                         return null;
                     }
 
-                    if (instance == null && !_sIsDestroying)
+                    if (instance == null && !_sIsDestroying && !SkipCurrentScene())
                     {
                         // Search for existing instance.
                         instance = (T)FindObjectOfType(typeof(T));
@@ -57,6 +61,9 @@ namespace m039.Common
                                 {
                                     DontDestroyOnLoad(instance.gameObject);
                                 }
+                            } else
+                            {
+                                MarkCurrentSceneAsSkipped();
                             }
 
                             DestroyImmediate(proxyObject);
@@ -71,6 +78,21 @@ namespace m039.Common
                     return instance;
                 }
             }
+        }
+
+        static bool SkipCurrentScene()
+        {
+            return _sScenesToSkip == null? false : _sScenesToSkip[SceneManager.GetActiveScene().buildIndex];
+        }
+
+        static void MarkCurrentSceneAsSkipped()
+        {
+            if (_sScenesToSkip == null)
+            {
+                _sScenesToSkip = new BitArray(SceneManager.sceneCountInBuildSettings, false);
+            }
+
+            _sScenesToSkip[SceneManager.GetActiveScene().buildIndex] = true;
         }
 
         protected virtual T CreateInstance()

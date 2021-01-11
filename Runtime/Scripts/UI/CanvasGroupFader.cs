@@ -46,6 +46,7 @@ namespace m039.Common
 
             IsFading = true;
             canvasGroup.blocksRaycasts = true;
+            canvasGroup.alpha = startAlpha;
 
             yield return null;
 
