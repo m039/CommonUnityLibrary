@@ -6,7 +6,8 @@ namespace m039.Common
 {
     /// <summary>
     /// Inherit from this base class to create a singleton.
-    /// e.g. public class MyClassName : SingletonMonoBehaviour<MyClassName> {}
+    /// 
+    /// E.g. public class MyClassName : SingletonMonoBehaviour<MyClassName> {}
     /// </summary>
     public class SingletonMonoBehaviour<T> : MonoBehaviour where T : SingletonMonoBehaviour<T>
     {
@@ -20,34 +21,36 @@ namespace m039.Common
         /// <summary>
         /// Which scenes don't have this kind of singleton.
         /// To prevent some objects from constantly spawning.
+        /// 
+        /// This array is different for each subclass. <see cref="https://stackoverflow.com/a/49582829/675695"/>
         /// </summary>
         static BitArray _sScenesToSkip;
 
         /// <summary>
-        /// Access singleton instance through this propriety.
+        /// Access a singleton instance through this propriety.
         /// </summary>
         public static T Instance
         {
             get
             {
+                if (!Application.isPlaying)
+                {
+                    return null; // Doesn't work with ExecuteInEditModeAttribute.
+                }
+
                 T instance = _sInstance;
 
                 lock (_sLock)
                 {
-                    if (!Application.isPlaying)
-                    {
-                        return null;
-                    }
-
                     if (instance == null && !_sIsDestroying && !SkipCurrentScene())
                     {
-                        // Search for existing instance.
+                        // Search for an existing instance.
                         instance = (T)FindObjectOfType(typeof(T));
 
-                        // Create new instance if one doesn't already exist.
+                        // Create a new instance if no one exists.
                         if (instance == null)
                         {
-                            // We need proxyObject and proxy only for virtual functions.
+                            // We need proxyObject and proxy for virtual functions only.
                             var proxyObject = new GameObject();
                             var proxy = proxyObject.AddComponent<T>();
 
@@ -56,7 +59,7 @@ namespace m039.Common
                                 instance = proxy.CreateInstance();
                                 instance.OnCreateInstance();
 
-                                // Make instance persistent.
+                                // Make the instance persistent.
                                 if (!proxy.ShouldDestroyOnLoad)
                                 {
                                     DontDestroyOnLoad(instance.gameObject);
