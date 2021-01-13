@@ -1,10 +1,26 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace m039.Common
 {
     public static class AnimationUtils
     {
+        public static IEnumerator AnimateAlpha(
+            Image image,
+            float startValue,
+            float endValue,
+            float duration,
+            EasingFunction.Ease ease = EasingFunction.Ease.Linear,
+            bool useUnscaledTime = false
+            )
+        {
+            if (image == null)
+                return null;
+
+            return Animate(startValue, endValue, duration, (v) => image.color = image.color.WithAlpha(v), ease, useUnscaledTime);
+        }
+
         public static IEnumerator AnimateAlpha(
             CanvasGroup canvsGroup,
             float startValue,
