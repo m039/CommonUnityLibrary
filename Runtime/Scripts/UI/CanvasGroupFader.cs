@@ -1,11 +1,8 @@
-using m039.Common;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace m039.Common
 {
-
     public class CanvasGroupFader : MonoBehaviour
     {
         #region Inspector
@@ -35,9 +32,11 @@ namespace m039.Common
 
         public bool IsFading { get; private set; }
 
+        public CanvasGroup CanvasGroup => _CanvasGroup;
+
         void Awake()
         {
-            _CanvasGroup.gameObject.SetActive(false);    
+            _CanvasGroup.gameObject.SetActive(false);
         }
 
         IEnumerator Fade(float startAlpha, float finalAlpha, CanvasGroup canvasGroup, float duration, AnimationCurve curve)
@@ -71,7 +70,7 @@ namespace m039.Common
         public IEnumerator FadeOut(float startAlpha = float.NaN)
         {
             _CanvasGroup.gameObject.SetActive(true);
-            yield return StartCoroutine(Fade(float.IsNaN(startAlpha)? _CanvasGroup.alpha : startAlpha, 1, _CanvasGroup, _FadeOutDuration, _FadeOutCurve));
+            yield return Fade(float.IsNaN(startAlpha)? _CanvasGroup.alpha : startAlpha, 1, _CanvasGroup, _FadeOutDuration, _FadeOutCurve);
         }
 
         /// <summary>
@@ -80,10 +79,9 @@ namespace m039.Common
         public IEnumerator FadeIn(float startAlpha = float.NaN)
         {
             _CanvasGroup.gameObject.SetActive(true);
-            yield return StartCoroutine(Fade(float.IsNaN(startAlpha) ? _CanvasGroup.alpha : startAlpha, 0, _CanvasGroup, _FadeInDuration, _FadeInCurve));
+            yield return Fade(float.IsNaN(startAlpha) ? _CanvasGroup.alpha : startAlpha, 0, _CanvasGroup, _FadeInDuration, _FadeInCurve);
             _CanvasGroup.gameObject.SetActive(false);
         }
 
     }
-
 }
