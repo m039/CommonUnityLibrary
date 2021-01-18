@@ -6,6 +6,12 @@ namespace m039.Common
 {
     public static class CoroutineUtils
     {
+        // 
+        // Warning:
+        //
+        // This function spawns coroutines and you can stop them only by <see cref="MonoBehaviour.StopAllCoroutines"/>.
+        // It looks like there is no other option to execute coroutines parallel.
+        //
         static public IEnumerator DoParallel(MonoBehaviour behaviour, params IEnumerator[] sequence)
         {
             if (sequence != null && behaviour != null) {
