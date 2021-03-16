@@ -17,6 +17,14 @@ namespace GP4
                 bigger.Contains(rightP) ||
                 bigger.Contains(bottomP);
         }
+
+        public static Rect ToRect(this Bounds bounds)
+        {
+            var center = bounds.center;
+            var size = bounds.size;
+
+            return new Rect(center.x - size.x / 2, center.y - size.y / 2, size.x, size.y);
+        }
     }
 
 }
