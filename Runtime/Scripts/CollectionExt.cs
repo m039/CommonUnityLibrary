@@ -78,6 +78,14 @@ namespace m039.Common
                 }
             }
         }
+
+        public static void Fill<T>(this IList<T> list, T with)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                list[i] = with;
+            }
+        }
     }
 
 }

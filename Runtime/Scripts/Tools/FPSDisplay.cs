@@ -13,7 +13,7 @@ namespace m039.Common
 
         const float UIMargin = 100f;
 
-        const float UICastShadowMargin = 4f;
+        const float UICastShadowMargin = 6f;
 
         #region Inspector
 

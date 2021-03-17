@@ -12,10 +12,31 @@ namespace GP4
             var rightP = smaller.center + Vector3.right * smaller.extents.x;
             var bottomP = smaller.center + Vector3.down * smaller.extents.y;
 
-            return bigger.Contains(leftP) ||
-                bigger.Contains(topP) ||
-                bigger.Contains(rightP) ||
-                bigger.Contains(bottomP);
+            return Within(bigger, leftP, topP, rightP, bottomP);
+        }
+
+        public static bool CircleWithin(Bounds area, Vector2 position, float radius)
+        {
+            var topY = area.center.y + area.size.y / 2;
+            var bottomY = area.center.y - area.size.y / 2;
+            var leftX = area.center.x - area.size.x / 2;
+            var rightX = area.center.x + area.size.x / 2;
+
+            return position.x >= leftX - radius &&
+                position.x <= rightX + radius &&
+                position.y <= topY + radius &&
+                position.y >= bottomY - radius;
+        }
+
+        public static bool Within(Bounds area, params Vector2[] points)
+        {
+            foreach (var p in points)
+            {
+                if (!area.Contains(p))
+                    return false;
+            }
+
+            return true;
         }
 
         public static Rect ToRect(this Bounds bounds)

@@ -1,8 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Common
+namespace m039.Common
 {
 
 	public static class MeshUtils
@@ -12,7 +12,29 @@ namespace Common
 			return CreateQuad(1, 1, Color.white, new Vector2(0.0f, 0.0f));
 		}
 
-		public static Mesh CreateQuad(float width, float height, Color color, Vector2 position)
+        public static Mesh CreateQuad(float width, float height, Color color, Vector2 position)
+        {
+            return CreateQuad(
+                width,
+                height,
+                new Color[]
+                {
+                    color,
+                    color,
+                    color,
+                    color
+                },
+                position,
+                new Vector2[]
+                {
+                    new Vector2(0, 0),
+                    new Vector2(1, 0),
+                    new Vector2(0, 1),
+                    new Vector2(1, 1)
+                });
+        }
+
+        public static Mesh CreateQuad(float width, float height, Color[] colors, Vector2 position, Vector2[] uvs)
 		{
 			var mesh = new Mesh();
 
@@ -40,20 +62,8 @@ namespace Common
 				-Vector3.forward
 			};
 
-			mesh.uv = new Vector2[] {
-				new Vector2(0, 0),
-				new Vector2(1, 0),
-				new Vector2(0, 1),
-				new Vector2(1, 1)
-			};
-
-			mesh.colors = new Color[]
-			{
-				color,
-				color,
-				color,
-				color
-			};
+			mesh.uv = uvs;
+			mesh.colors = colors;
 
 			return mesh;
 		}
