@@ -1,6 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
+using static m039.Common.UIUtils;
 
 namespace m039.Common
 {
@@ -8,8 +8,6 @@ namespace m039.Common
     public class FPSDisplay : MonoBehaviour
     {
         const float UpdateInterval = 0.5f;
-
-        const float UIReferenceHeight = 1920f;
 
         const float UIMargin = 100f;
 
@@ -44,6 +42,8 @@ namespace m039.Common
         float _fps;
 
         int _frames;
+
+        public float FPS => _fps;
 
         void Awake()
         {
@@ -83,10 +83,9 @@ namespace m039.Common
         {
             var width = Screen.width;
             var height = Screen.height;
-            var coeff = Screen.height / UIReferenceHeight;
-            var rect = new Rect(UIMargin * coeff, UIMargin * coeff, width, height);
+            var rect = new Rect(UIMargin * UICoeff, UIMargin * UICoeff, width, height);
 
-            _style.fontSize = (int) (_FontSize * coeff);
+            _style.fontSize = (int) (_FontSize * UICoeff);
 
             string text;
 
@@ -103,7 +102,7 @@ namespace m039.Common
             var castShadowRect = rect;
 
             _style.normal.textColor = _FontCastShadowColor;
-            castShadowRect.center += Vector2.one * coeff * UICastShadowMargin;
+            castShadowRect.center += Vector2.one * UICoeff * UICastShadowMargin;
 
             GUI.Label(castShadowRect, text, _style);
 
