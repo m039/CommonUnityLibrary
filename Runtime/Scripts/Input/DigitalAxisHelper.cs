@@ -13,8 +13,6 @@ namespace m039.Common
     /// </summary>
     public class DigitalAxisHelper
     {
-        public delegate T GetSettingValue<T>();
-
         #region Settings
 
         public GetSettingValue<bool> snap = () => true;
