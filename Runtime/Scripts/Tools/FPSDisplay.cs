@@ -9,9 +9,11 @@ namespace m039.Common
     {
         const float UpdateInterval = 0.5f;
 
-        const float UIMargin = 100f;
+        const float UICastShadowMargin = 4f;
 
-        const float UICastShadowMargin = 6f;
+        const float HighLoadFPS = 10f;
+
+        const float MediumLoadFPS = 30f;
 
         #region Inspector
 
@@ -45,12 +47,14 @@ namespace m039.Common
 
         public float FPS => _fps;
 
+        public bool Visibility { get; set; } = true;
+
         void Awake()
         {
             _style = new GUIStyle();
             _style.alignment = TextAnchor.UpperLeft;
             _style.normal.textColor = Color.blue;
-            _style.font = Resources.Load<Font>("CommonUnityLibrary/MonospaceFont/RobotoMono-Regular");
+            _style.font = LoadFont(FontCategory.Monospace, FontStyle.Normal);
         }
 
         void OnEnable()
@@ -81,9 +85,12 @@ namespace m039.Common
 
         void OnGUI()
         {
+            if (!Visibility)
+                return;
+
             var width = Screen.width;
             var height = Screen.height;
-            var rect = new Rect(UIMargin * UICoeff, UIMargin * UICoeff, width, height);
+            var rect = new Rect(UIMediumMargin * UICoeff, UIMediumMargin * UICoeff, width, height);
 
             _style.fontSize = (int) (_FontSize * UICoeff);
 
@@ -110,11 +117,11 @@ namespace m039.Common
 
             var color = _FontNormalLoadColor;
 
-            if (_fps < 10)
+            if (_fps < HighLoadFPS)
             {
                 color = _FontHighLoadColor;
             }
-            else if (_fps < 30)
+            else if (_fps < MediumLoadFPS)
             {
                 color = _FontMediumLoadColor;
             }
