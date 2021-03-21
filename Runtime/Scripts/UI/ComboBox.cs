@@ -85,7 +85,7 @@ namespace m039.Common
 
         private static int _sUseControlID = -1;
 
-        readonly Rect _rect;
+        public Rect rect;
 
         GUIStyle _buttonStyle;
 
@@ -125,7 +125,7 @@ namespace m039.Common
             GUIStyle listStyle
             )
         {
-            this._rect = rect;
+            this.rect = rect;
             this._buttonContent = listContent[0];
             this._listContent = listContent;
             this._buttonStyle = buttonStyle;
@@ -156,7 +156,7 @@ namespace m039.Common
                     break;
             }
 
-            if (GUI.Button(_rect, _buttonContent, _buttonStyle))
+            if (GUI.Button(rect, _buttonContent, _buttonStyle))
             {
                 if (_sUseControlID == -1)
                 {
@@ -176,12 +176,12 @@ namespace m039.Common
             if (_isClickedComboButton)
             {
                 var lineHeight = _listStyle.CalcHeight(_listContent[0], 1.0f);
-                Rect listRect = new Rect(_rect.x, _rect.y + _rect.height,
-                         _rect.width, lineHeight * _listContent.Length);
+                Rect listRect = new Rect(rect.x, rect.y + rect.height,
+                         rect.width, lineHeight * _listContent.Length);
 
                 if (_direction == PopupDirection.FromBottomToTop)
                 {
-                    listRect.y = _rect.y - listRect.height;
+                    listRect.y = rect.y - listRect.height;
                 }
 
                 GUI.Box(listRect, string.Empty, _boxStyle);
