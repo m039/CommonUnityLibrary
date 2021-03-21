@@ -13,6 +13,8 @@ namespace m039.Common
 
         public static float UISmallMargin => 32f * UICoeff;
 
+        public static float UISmallPadding => UISmallMargin / 2;
+
         public enum FontCategory
         {
             SansSerif, Monospace

@@ -33,9 +33,14 @@ namespace m039.Common
         [SerializeField]
         Color _FontCastShadowColor = Color.black;
 
+        [SerializeField]
+        bool _ShowFrame = true;
+
         #endregion
 
-        GUIStyle _style;
+        GUIStyle _labelStyle;
+
+        GUIStyle _frameStyle;
 
         float _timeLeft;
 
@@ -45,16 +50,26 @@ namespace m039.Common
 
         int _frames;
 
+        Texture2D _frameTexture;
+
         public float FPS => _fps;
 
         public bool Visibility { get; set; } = true;
 
         void Awake()
         {
-            _style = new GUIStyle();
-            _style.alignment = TextAnchor.UpperLeft;
-            _style.normal.textColor = Color.blue;
-            _style.font = LoadFont(FontCategory.Monospace, FontStyle.Normal);
+            _labelStyle = new GUIStyle();
+            _labelStyle.alignment = TextAnchor.UpperLeft;
+            _labelStyle.normal.textColor = Color.blue;
+            _labelStyle.font = LoadFont(FontCategory.Monospace, FontStyle.Normal);
+
+            _frameTexture = new Texture2D(1, 1);
+            _frameTexture.wrapMode = TextureWrapMode.Repeat;
+            _frameTexture.SetPixel(0, 0, Color.black.WithAlpha(0.2f));
+            _frameTexture.Apply();
+
+            _frameStyle = new GUIStyle();
+            _frameStyle.normal.background = _frameTexture;
         }
 
         void OnEnable()
@@ -88,11 +103,7 @@ namespace m039.Common
             if (!Visibility)
                 return;
 
-            var width = Screen.width;
-            var height = Screen.height;
-            var rect = new Rect(UIMediumMargin * UICoeff, UIMediumMargin * UICoeff, width, height);
-
-            _style.fontSize = (int) (_FontSize * UICoeff);
+            _labelStyle.fontSize = (int) (_FontSize * UICoeff);
 
             string text;
 
@@ -104,14 +115,31 @@ namespace m039.Common
                 text = string.Format("{0,4:0.} FPS ({1,3:0.0} ms)", _fps, 1f / _fps * 1000f);
             }
 
+            var textSize = _labelStyle.CalcSize(new GUIContent(text));
+            var rect = new Rect(UIMediumMargin * UICoeff, UIMediumMargin * UICoeff, textSize.x, textSize.y);
+
+            // Draw a frame.
+
+            if (_ShowFrame)
+            {
+                var frameRect = new Rect(rect);
+                
+                frameRect.x -= UISmallPadding;
+                frameRect.y -= UISmallPadding;
+                frameRect.width += UISmallPadding * 2;
+                frameRect.height += UISmallPadding * 2;
+
+                GUI.Box(frameRect, _frameTexture, _frameStyle);
+            }
+
             // Draw a cast shadow.
 
             var castShadowRect = rect;
 
-            _style.normal.textColor = _FontCastShadowColor;
+            _labelStyle.normal.textColor = _FontCastShadowColor;
             castShadowRect.center += Vector2.one * UICoeff * UICastShadowMargin;
 
-            GUI.Label(castShadowRect, text, _style);
+            GUI.Label(castShadowRect, text, _labelStyle);
 
             // Draw the text.
 
@@ -126,9 +154,9 @@ namespace m039.Common
                 color = _FontMediumLoadColor;
             }
 
-            _style.normal.textColor = color;
+            _labelStyle.normal.textColor = color;
 
-            GUI.Label(rect, text, _style);
+            GUI.Label(rect, text, _labelStyle);
         }
     }
 
