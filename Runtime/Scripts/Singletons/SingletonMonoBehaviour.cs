@@ -128,7 +128,7 @@ namespace m039.Common
 
         protected virtual bool ShouldDestroyOnLoad => true;
 
-        protected virtual bool ShouldCreateIfNotExist => Application.isPlaying; // Don't add new objects to the scene when the game is playing.
+        protected virtual bool ShouldCreateIfNotExist => Application.isPlaying; // Don't add new objects to the scene while the game is playing.
     }
 
     public class SingletonMonoBehaviour<T, I> : SingletonMonoBehaviour<T> where T : SingletonMonoBehaviour<T, I>, I
