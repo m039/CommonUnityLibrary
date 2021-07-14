@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -18,12 +16,19 @@ namespace m039.Common
                 {
                     var temp = CreateInstance<T>() as SingletonScriptableObject<T>;
 
-                    if (temp == null || !temp.UseResourceFolder)
+                    try
                     {
-                        _Instance = Resources.FindObjectsOfTypeAll<T>().FirstOrDefault();
-                    } else
+                        if (temp == null || !temp.UseResourceFolder)
+                        {
+                            _Instance = Resources.FindObjectsOfTypeAll<T>().FirstOrDefault();
+                        }
+                        else
+                        {
+                            _Instance = Resources.Load<T>(temp.PathToResource);
+                        }
+                    } finally
                     {
-                        _Instance = Resources.Load<T>(temp.PathToResource);
+                        DestroyImmediate(temp);
                     }
 
                     if (_Instance == null)

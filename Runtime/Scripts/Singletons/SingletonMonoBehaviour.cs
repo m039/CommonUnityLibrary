@@ -13,9 +13,6 @@ namespace m039.Common
     {
         private static T _sInstance;
 
-        /// This flag is needed to prevent creating GameObjects when a scene is closed.
-        private static bool _sIsDestroying; 
-
         private static object _sLock = new object();
 
         /// <summary>
@@ -33,69 +30,78 @@ namespace m039.Common
         {
             get
             {
-                if (!Application.isPlaying)
-                {
-                    return null; // Doesn't work with ExecuteInEditModeAttribute.
-                }
-
                 T instance = _sInstance;
 
                 lock (_sLock)
                 {
-                    if (instance == null && !_sIsDestroying && !SkipCurrentScene())
+                    if (instance == null && !IsActiveSceneSkipped())
                     {
                         // Search for an existing instance.
-                        instance = (T)FindObjectOfType(typeof(T));
+                        instance = FindObjectOfType<T>();
 
                         // Create a new instance if no one exists.
                         if (instance == null)
                         {
-                            // We need proxyObject and proxy for virtual functions only.
                             var proxyObject = new GameObject();
                             var proxy = proxyObject.AddComponent<T>();
 
-                            if (proxy.ShouldCreateIfNotExist)
+                            // We need proxyObject and proxy for virtual functions only.
+                            try
                             {
-                                instance = proxy.CreateInstance();
-                                instance.OnCreateInstance();
-
-                                // Make the instance persistent.
-                                if (!proxy.ShouldDestroyOnLoad)
+                                if (proxy.ShouldCreateIfNotExist)
                                 {
-                                    DontDestroyOnLoad(instance.gameObject);
-                                }
-                            } else
-                            {
-                                MarkCurrentSceneAsSkipped();
-                            }
+                                    instance = proxy.CreateInstance();
+                                    instance.OnCreateInstance();
 
-                            DestroyImmediate(proxyObject);
+                                    // Make the instance persistent.
+                                    if (!proxy.ShouldDestroyOnLoad)
+                                    {
+                                        DontDestroyOnLoad(instance.gameObject);
+                                    }
+                                }
+                                else
+                                {
+                                    MarkActiveSceneAsSkipped();
+                                }
+                            }
+                            finally
+                            {
+                                DestroyImmediate(proxyObject);
+                            }
                         }
                     }
 
-                    if (instance != null)
-                    {
-                        _sInstance = instance;
-                    }
-
-                    return instance;
+                    return _sInstance = instance;
                 }
             }
         }
 
-        static bool SkipCurrentScene()
+        static bool IsActiveSceneSkipped()
         {
-            return _sScenesToSkip == null? false : _sScenesToSkip[SceneManager.GetActiveScene().buildIndex];
+            if (!Application.isPlaying)
+                return false;
+
+            var buildIndex = SceneManager.GetActiveScene().buildIndex;
+
+            return _sScenesToSkip == null || buildIndex < 0? false : _sScenesToSkip[buildIndex];
         }
 
-        static void MarkCurrentSceneAsSkipped()
+        static void MarkActiveSceneAsSkipped()
         {
+            if (!Application.isPlaying)
+                return;
+
+            var buildIndex = SceneManager.GetActiveScene().buildIndex;
+
             if (_sScenesToSkip == null)
             {
                 _sScenesToSkip = new BitArray(SceneManager.sceneCountInBuildSettings, false);
             }
 
-            _sScenesToSkip[SceneManager.GetActiveScene().buildIndex] = true;
+            if (buildIndex >= 0) // A scene could not be in the build settings.
+            {
+                _sScenesToSkip[SceneManager.GetActiveScene().buildIndex] = true;
+            }
         }
 
         protected virtual T CreateInstance()
@@ -117,15 +123,12 @@ namespace m039.Common
             if (ShouldDestroyOnLoad)
             {
                 _sInstance = null;
-            } else
-            {
-                _sIsDestroying = true;
             }
         }
 
         protected virtual bool ShouldDestroyOnLoad => true;
 
-        protected virtual bool ShouldCreateIfNotExist => true;
+        protected virtual bool ShouldCreateIfNotExist => Application.isPlaying; // Don't add new objects to the scene when the game is playing.
     }
 
     public class SingletonMonoBehaviour<T, I> : SingletonMonoBehaviour<T> where T : SingletonMonoBehaviour<T, I>, I
