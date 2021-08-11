@@ -33,7 +33,7 @@ namespace m039.Common
                     Transform selectedObjectT = selectedObjects[objectI].transform;
 
                     for (int childI = 0, i = _startIndex; childI < selectedObjectT.childCount; childI++)
-                        selectedObjectT.GetChild(childI).name = $"{_childrenPrefix}{i++}";
+                        selectedObjectT.GetChild(childI).name = $"{_childrenPrefix}({i++})";
                 }
             }
         }
