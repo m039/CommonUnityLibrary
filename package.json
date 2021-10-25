@@ -1,15 +1,18 @@
 {
-	"name": "com.m039.common-unity-library",
-	"version": "0.0.2",
-	"displayName": "Common Unity Library",
-	"description": "A library with common for all my projects code or assets",
-	"unity": "2019.1",
-	"keywords": [
-		"common",
-		"utils"
-	],
-	"author": {
-		"name": "Dmitry Mozgin",
-		"url": "http://twitter.com/m0391n"
-	}
+  "name": "com.m039.common-unity-library",
+  "version": "0.0.2",
+  "displayName": "Common Unity Library",
+  "description": "A library with common for all my projects code or assets",
+  "unity": "2019.1",
+  "keywords": [
+    "common",
+    "utils"
+  ],
+  "author": {
+    "name": "Dmitry Mozgin",
+    "url": "http://twitter.com/m0391n"
+  },
+  "dependencies": {
+    "com.unity.textmeshpro": "3.0.6"
+  }
 }

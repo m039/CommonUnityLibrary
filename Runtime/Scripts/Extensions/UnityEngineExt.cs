@@ -7,7 +7,6 @@ namespace m039.Common
 
     public static class UnityEngineExt
     {
-
         public static T GetComponentInParentRecursively<T>(this Component component)
         {
             T result;
