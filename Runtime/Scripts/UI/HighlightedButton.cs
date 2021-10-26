@@ -35,8 +35,6 @@ namespace m039.Common
 
         void Start()
         {
-            _textMesh = GetComponentInChildren<TextMeshProUGUI>();
-            _button = gameObject.GetComponent<Button>();
             Reset();
         }
 
@@ -46,6 +44,9 @@ namespace m039.Common
 
         public void Reset()
         {
+            _textMesh = GetComponentInChildren<TextMeshProUGUI>();
+            _button = gameObject.GetComponent<Button>();
+
             _lastButtonStatus = ButtonStatus.Normal;
             _isHighlightDesired = false;
             _isPressedDesired = false;
