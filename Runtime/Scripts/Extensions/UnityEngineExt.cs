@@ -55,6 +55,18 @@ namespace m039.Common
             var formatString = "F" + precision;
             return string.Format($"({{0:{formatString}}}, {{1:{formatString}}}, {{2:{formatString}}})", vector.x, vector.y, vector.z);
         }
+
+        public static void DestroyAllChildrenImmediate(this Transform tr)
+        {
+            if (tr == null)
+                return;
+
+            int count = tr.childCount;
+            for (int i = count - 1; i >= 0; i--)
+            {
+                GameObject.DestroyImmediate(tr.GetChild(i).gameObject);
+            }
+        }
     }
 
 }

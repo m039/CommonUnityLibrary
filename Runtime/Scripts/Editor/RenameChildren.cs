@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEditor;
 
+#if UNITY_EDITOR
+
 namespace m039.Common
 {
     // The code is borrowed from <see href="https://answers.unity.com/questions/1758798/is-there-anyway-to-batch-renaming-via-editor-not-o.html">here</see>.
@@ -31,7 +33,7 @@ namespace m039.Common
                 for (int objectI = 0; objectI < selectedObjects.Length; objectI++)
                 {
                     Transform selectedObjectT = selectedObjects[objectI].transform;
-
+                    
                     for (int childI = 0, i = _startIndex; childI < selectedObjectT.childCount; childI++)
                         selectedObjectT.GetChild(childI).name = $"{_childrenPrefix}({i++})";
                 }
@@ -40,3 +42,5 @@ namespace m039.Common
     }
 
 }
+
+#endif
