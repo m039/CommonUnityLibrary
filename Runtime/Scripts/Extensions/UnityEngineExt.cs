@@ -56,6 +56,18 @@ namespace m039.Common
             return string.Format($"({{0:{formatString}}}, {{1:{formatString}}}, {{2:{formatString}}})", vector.x, vector.y, vector.z);
         }
 
+        public static void DestroyAllChildren(this Transform tr)
+        {
+            if (tr == null)
+                return;
+
+            int count = tr.childCount;
+            for (int i = count - 1; i >= 0; i--)
+            {
+                GameObject.Destroy(tr.GetChild(i).gameObject);
+            }
+        }
+
         public static void DestroyAllChildrenImmediate(this Transform tr)
         {
             if (tr == null)
