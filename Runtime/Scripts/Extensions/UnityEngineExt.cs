@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace m039.Common
@@ -7,19 +5,6 @@ namespace m039.Common
 
     public static class UnityEngineExt
     {
-        public static T GetComponentInParentRecursively<T>(this Component component)
-        {
-            T result;
-
-            do
-            {
-                result = component.GetComponent<T>();
-                component = component.transform.parent;
-            } while (result == null && component != null);
-           
-            return result;
-        }
-
         public static Color WithValue(this Color color, float value)
         {
             Color.RGBToHSV(color, out float h, out float s, out _);
@@ -50,34 +35,15 @@ namespace m039.Common
             return vector;
         }
 
-        public static string ToStringVerbose(this Vector3 vector, int precision = 3)
+        public static string GetPath(this Transform current)
         {
-            var formatString = "F" + precision;
-            return string.Format($"({{0:{formatString}}}, {{1:{formatString}}}, {{2:{formatString}}})", vector.x, vector.y, vector.z);
-        }
+            if (current == null)
+                return "null";
 
-        public static void DestroyAllChildren(this Transform tr)
-        {
-            if (tr == null)
-                return;
+            if (current.parent == null)
+                return current.name;
 
-            int count = tr.childCount;
-            for (int i = count - 1; i >= 0; i--)
-            {
-                GameObject.Destroy(tr.GetChild(i).gameObject);
-            }
-        }
-
-        public static void DestroyAllChildrenImmediate(this Transform tr)
-        {
-            if (tr == null)
-                return;
-
-            int count = tr.childCount;
-            for (int i = count - 1; i >= 0; i--)
-            {
-                GameObject.DestroyImmediate(tr.GetChild(i).gameObject);
-            }
+            return current.parent.GetPath() + "/" + current.name;
         }
     }
 

@@ -1,6 +1,6 @@
 {
   "name": "com.m039.common-unity-library",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "displayName": "Common Unity Library",
   "description": "A library with common for all my projects code or assets",
   "unity": "2019.1",
@@ -11,8 +11,5 @@
   "author": {
     "name": "Dmitry Mozgin",
     "url": "http://twitter.com/m0391n"
-  },
-  "dependencies": {
-    "com.unity.textmeshpro": "3.0.6"
   }
 }
