@@ -17,7 +17,7 @@ namespace m039.Common
 
                     try
                     {
-                        if (temp == null || !temp.UseResourceFolder)
+                        if (string.IsNullOrEmpty(temp.PathToResource))
                         {
                             s_Instance = Resources.FindObjectsOfTypeAll<T>().FirstOrDefault();
                         }
@@ -40,8 +40,6 @@ namespace m039.Common
                 return s_Instance;
             }
         }
-
-        protected virtual bool UseResourceFolder => false;
 
         protected virtual string PathToResource => null;
 
