@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace m039.Common {
     public static class Log {
@@ -104,6 +105,8 @@ namespace m039.Common {
             void Warning(string message);
 
             ILogger SetPrinter(PrintDelegate printer);
+
+            ILogger SetEnabled(bool enabled);
         }
 
         class Logger : ILogger {
@@ -120,6 +123,8 @@ namespace m039.Common {
             string _senderName;
 
             PrintDelegate _printer;
+
+            bool _enabled;
 
             private Logger() {
             }
@@ -166,6 +171,7 @@ namespace m039.Common {
                 _senderObject = null;
                 _senderType = null;
                 _senderName = null;
+                _enabled = true;
                 _printer = DefaultPrinter;
             }
 
@@ -190,7 +196,16 @@ namespace m039.Common {
                 return this;
             }
 
+            public ILogger SetEnabled(bool enabled)
+            {
+                _enabled = enabled;
+                return this;
+            }
+
             void Log(string message, LogLevel level) {
+                if (!_enabled)
+                    return;
+
                 if (_senderObject != null) {
                     DescribeSender(_senderObject, ref message);
                     _senderType = _senderObject.GetType();
