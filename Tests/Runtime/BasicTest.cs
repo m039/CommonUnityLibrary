@@ -52,7 +52,7 @@ namespace m039.Common
         [Test]
         public void EventPasses()
         {
-            EventBus.Logger.SetEnabled(false);
+            EventBus.Global.Logger.SetEnabled(false);
 
             EventPassesTest test1 = new();
             test1.Test();
@@ -64,8 +64,35 @@ namespace m039.Common
 
             System.GC.Collect();
 
-            EventBus.Raise<IEvent4>(a => a.Count());
+            EventBus.Global.Raise<IEvent4>(a => a.Count());
             Assert.AreEqual(1, s_EventPassesCounter);
+        }
+
+        [Test]
+        public void ServiceLocatorPasses()
+        {
+            var serviceLocator = ServiceLocator.Global;
+            serviceLocator.Logger.SetEnabled(true);
+
+            Assert.IsFalse(serviceLocator.TryGet<IncService>(out _));
+            var service = new IncService();
+            Assert.AreEqual(10, service.number);
+            serviceLocator.Register<IIncService>(service);
+            serviceLocator.Get<IIncService>().Inc();
+            Assert.AreEqual(11, service.number);
+        }
+
+        interface IIncService
+        {
+            int number { get; }
+            void Inc();
+        }
+
+        class IncService : IIncService
+        {
+            public int number { get; set; } = 10;
+
+            public void Inc() => number++;
         }
 
         [UnityTest]
@@ -113,9 +140,9 @@ namespace m039.Common
             {
                 Assert.AreEqual(0, s_EventPassesCounter);
 
-                EventBus.Subscribe(this);
+                EventBus.Global.Subscribe(this);
 
-                EventBus.Raise<IEvent4>(a => a.Count());
+                EventBus.Global.Raise<IEvent4>(a => a.Count());
 
                 Assert.AreEqual(1, s_EventPassesCounter);
             }
@@ -147,7 +174,7 @@ namespace m039.Common
             public void Unsub()
             {
                 _unsubscribed++;
-                EventBus.Unsubscribe(this);
+                EventBus.Global.Unsubscribe(this);
             }
 
             public void Test()
@@ -155,30 +182,30 @@ namespace m039.Common
                 Assert.AreEqual(_number, 0);
                 Assert.AreEqual(_string, "");
 
-                EventBus.Raise<IEvent1>(a => a.AddNumbers(1));
+                EventBus.Global.Raise<IEvent1>(a => a.AddNumbers(1));
 
                 Assert.AreEqual(0, _number);
 
-                EventBus.Subscribe(this);
+                EventBus.Global.Subscribe(this);
 
-                EventBus.Raise<IEvent1>(a => a.AddNumbers(1));
-                EventBus.Raise<IEvent1>(a => a.AddNumbers(1));
+                EventBus.Global.Raise<IEvent1>(a => a.AddNumbers(1));
+                EventBus.Global.Raise<IEvent1>(a => a.AddNumbers(1));
 
                 Assert.AreEqual(2, _number);
 
-                EventBus.Raise<IEvent2>(a => a.AddStrings("a"));
-                EventBus.Raise<IEvent2>(a => a.AddStrings("b"));
+                EventBus.Global.Raise<IEvent2>(a => a.AddStrings("a"));
+                EventBus.Global.Raise<IEvent2>(a => a.AddStrings("b"));
 
                 Assert.AreEqual("ab", _string);
                 Assert.AreEqual(0, _unsubscribed);
 
-                EventBus.Raise<IEvent3>(a => a.Unsub());
-                EventBus.Raise<IEvent1>(a => a.AddNumbers(1));
-                EventBus.Raise<IEvent2>(a => a.AddStrings("a"));
+                EventBus.Global.Raise<IEvent3>(a => a.Unsub());
+                EventBus.Global.Raise<IEvent1>(a => a.AddNumbers(1));
+                EventBus.Global.Raise<IEvent2>(a => a.AddStrings("a"));
 
                 Assert.AreEqual(1, _unsubscribed);
 
-                EventBus.Raise<IEvent3>(a => a.Unsub());
+                EventBus.Global.Raise<IEvent3>(a => a.Unsub());
 
                 Assert.AreEqual(1, _unsubscribed);
 

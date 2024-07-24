@@ -9,50 +9,74 @@ namespace m039.Common
     {
     }
 
-    public static class EventBus
+    public class EventBus
     {
-        static readonly Dictionary<Type, SubscriberList<ISubscriber>> s_Subscribers = new();
+        static public Lazy<EventBus> s_Global = new(() => new EventBus("Global"));
 
-        static readonly Dictionary<Type, List<Type>> s_CachedSubscriberTypes = new();
+        public static EventBus Global => s_Global.Value;
 
-        public static Log.ILogger Logger = Log.Get(typeof(EventBus)).SetEnabled(false);
+        readonly Dictionary<Type, SubscriberList<ISubscriber>> _subscribers = new();
 
-        public static void Subscribe(ISubscriber subscriber)
+        readonly Dictionary<Type, List<Type>> _cachedSubscriberTypes = new();
+
+        public readonly Log.ILogger Logger;
+
+        public EventBus() : this(null) {
+        }
+
+        public EventBus(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                Logger = Log.Get(typeof(EventBus));
+            } else
+            {
+                Logger = Log.Get(nameof(EventBus) + " (" + name + ")");
+            }
+
+#if M039_COMMON_VERBOSE
+            Logger.SetEnabled(true);
+#else
+            Logger.SetEnabled(false);
+#endif
+        }
+
+        public void Subscribe(ISubscriber subscriber)
         {
             var subscriberTypes = GetSubscriberTypes(subscriber);
 
             foreach (var t in subscriberTypes)
             {
-                if (!s_Subscribers.ContainsKey(t))
+                if (!_subscribers.ContainsKey(t))
                 {
-                    s_Subscribers[t] = new SubscriberList<ISubscriber>();
+                    _subscribers[t] = new SubscriberList<ISubscriber>();
                 }
-                s_Subscribers[t].Add(subscriber);
+                _subscribers[t].Add(subscriber);
             }
         }
 
-        public static void Unsubscribe(ISubscriber subscriber)
+        public void Unsubscribe(ISubscriber subscriber)
         {
             var subscriberTypes = GetSubscriberTypes(subscriber);
             foreach (var t in subscriberTypes)
             {
-                if (s_Subscribers.ContainsKey(t))
+                if (_subscribers.ContainsKey(t))
                 {
-                    s_Subscribers[t].Remove(subscriber);
+                    _subscribers[t].Remove(subscriber);
                 }
             }
         }
 
-        public static void Raise<T>(Action<T> action) where T : ISubscriber
+        public void Raise<T>(Action<T> action) where T : ISubscriber
         {
-            if (!s_Subscribers.ContainsKey(typeof(T)))
+            if (!_subscribers.ContainsKey(typeof(T)))
             {
                 Logger.Warning($"Can't raise an event [{typeof(T).Name}], no subscribers.");
                 return;
             }
 
             var cleanUpCount = 0;
-            var subscribers = s_Subscribers[typeof(T)];
+            var subscribers = _subscribers[typeof(T)];
             subscribers.Executing = true;
             for (int i = 0; i < subscribers.List.Count; i++) {
                 try
@@ -82,12 +106,12 @@ namespace m039.Common
             }
         }
 
-        static List<Type> GetSubscriberTypes(ISubscriber subscriber)
+        List<Type> GetSubscriberTypes(ISubscriber subscriber)
         {
             var type = subscriber.GetType();
-            if (s_CachedSubscriberTypes.ContainsKey(type))
+            if (_cachedSubscriberTypes.ContainsKey(type))
             {
-                return s_CachedSubscriberTypes[type];
+                return _cachedSubscriberTypes[type];
             }
 
             var subscriberTypes = type
@@ -95,7 +119,7 @@ namespace m039.Common
                 .Where(it => typeof(ISubscriber).IsAssignableFrom(it) && it != typeof(ISubscriber))
                 .ToList();
 
-            s_CachedSubscriberTypes[type] = subscriberTypes;
+            _cachedSubscriberTypes[type] = subscriberTypes;
 
             return subscriberTypes;
         }

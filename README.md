@@ -6,6 +6,7 @@ A library with common for all my projects code and assets.
 
 * Singletons
 * Logger
-* EventBus
+* Event bus
+* Service locator
 * Attributes
 * Easings
