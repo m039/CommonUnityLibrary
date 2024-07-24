@@ -15,7 +15,7 @@ namespace m039.Common
 
         static readonly Dictionary<Type, List<Type>> s_CachedSubscriberTypes = new();
 
-        public static Log.ILogger Logger = Log.Get(typeof(EventBus));
+        public static Log.ILogger Logger = Log.Get(typeof(EventBus)).SetEnabled(false);
 
         public static void Subscribe(ISubscriber subscriber)
         {
@@ -51,13 +51,22 @@ namespace m039.Common
                 return;
             }
 
+            var cleanUpCount = 0;
             var subscribers = s_Subscribers[typeof(T)];
             subscribers.Executing = true;
-            foreach (var subscriber in subscribers.List)
-            {
+            for (int i = 0; i < subscribers.List.Count; i++) {
                 try
                 {
-                    action.Invoke((T)subscriber);
+                    var subscriber = subscribers.List[i];
+                    if (subscriber.Target == null)
+                    {
+                        subscribers.RemoveAt(i);
+                        cleanUpCount++;
+                    }
+                    else
+                    {
+                        action.Invoke((T)subscriber.Target);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -66,6 +75,11 @@ namespace m039.Common
             }
             subscribers.Executing = false;
             subscribers.CleanUp();
+
+            if (cleanUpCount > 0)
+            {
+                Logger.Info($"Cleaned up {cleanUpCount} references of [{typeof(T).Name}].");
+            }
         }
 
         static List<Type> GetSubscriberTypes(ISubscriber subscriber)
@@ -92,28 +106,40 @@ namespace m039.Common
 
             public bool Executing;
 
-            public readonly List<T> List = new();
-
-            readonly List<T> _wasRemoved = new();
+            public readonly List<WeakReference> List = new();
 
             public void Add(T subscriber)
             {
-                List.Add(subscriber);
+                List.Add(new WeakReference(subscriber));
+            }
+
+            public void RemoveAt(int index)
+            {
+                if (Executing)
+                {
+                    _needsCleanUp = true;
+                    List[index] = null;
+                }
+                else
+                {
+                    List.RemoveAt(index);
+                }
             }
 
             public void Remove(T subscriber)
             {
                 if (Executing)
                 {
-                    var i = List.IndexOf(subscriber);
+                    var i = List.FindIndex(x => x.Target == subscriber);
                     if (i >= 0)
                     {
                         _needsCleanUp = true;
-                        _wasRemoved.Add(subscriber);
+                        List[i] = null;
                     }
                 } else
                 {
-                    List.Remove(subscriber);
+                    var i = List.FindIndex(x => x.Target == subscriber);
+                    List.RemoveAt(i);
                 }
             }
 
@@ -122,12 +148,7 @@ namespace m039.Common
                 if (!_needsCleanUp)
                     return;
 
-                foreach (var s in _wasRemoved)
-                {
-                    List.Remove(s);
-                }
-
-                _wasRemoved.Clear();
+                List.RemoveAll(x => x == null);
                 _needsCleanUp = false;
             }
         }

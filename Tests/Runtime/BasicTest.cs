@@ -47,11 +47,25 @@ namespace m039.Common
             Assert.AreEqual("OTHER:[BasicTest] 2", str);
         }
 
+        static int s_EventPassesCounter = 0;
+
         [Test]
         public void EventPasses()
         {
-            var test = new EventPassesTest();
-            test.Test();
+            EventBus.Logger.SetEnabled(false);
+
+            EventPassesTest test1 = new();
+            test1.Test();
+
+            {
+                EventPassesTestGC test2 = new();
+                test2.Test();
+            }
+
+            System.GC.Collect();
+
+            EventBus.Raise<IEvent4>(a => a.Count());
+            Assert.AreEqual(1, s_EventPassesCounter);
         }
 
         [UnityTest]
@@ -83,6 +97,35 @@ namespace m039.Common
             void Unsub();
         }
 
+        interface IEvent4 : ISubscriber
+        {
+            void Count();
+        }
+
+        class EventPassesTestGC : IEvent4
+        {
+            public void Nothing()
+            {
+
+            }
+
+            public void Test()
+            {
+                Assert.AreEqual(0, s_EventPassesCounter);
+
+                EventBus.Subscribe(this);
+
+                EventBus.Raise<IEvent4>(a => a.Count());
+
+                Assert.AreEqual(1, s_EventPassesCounter);
+            }
+
+            public void Count()
+            {
+                s_EventPassesCounter++;
+            }
+        }
+
         class EventPassesTest : IEvent1, IEvent2, IEvent3
         {
             int _number;
@@ -109,8 +152,6 @@ namespace m039.Common
 
             public void Test()
             {
-                EventBus.Logger.SetEnabled(false);
-
                 Assert.AreEqual(_number, 0);
                 Assert.AreEqual(_string, "");
 
