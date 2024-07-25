@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace m039.Common
 {
-    public interface ISubscriber
+    public interface IEventSubscriber
     {
     }
 
@@ -15,7 +15,7 @@ namespace m039.Common
 
         public static EventBus Global => s_Global.Value;
 
-        readonly Dictionary<Type, SubscriberList<ISubscriber>> _subscribers = new();
+        readonly Dictionary<Type, EventSubscriberList<IEventSubscriber>> _subscribers = new();
 
         readonly Dictionary<Type, List<Type>> _cachedSubscriberTypes = new();
 
@@ -41,7 +41,7 @@ namespace m039.Common
 #endif
         }
 
-        public void Subscribe(ISubscriber subscriber)
+        public void Subscribe(IEventSubscriber subscriber)
         {
             var subscriberTypes = GetSubscriberTypes(subscriber);
 
@@ -49,13 +49,13 @@ namespace m039.Common
             {
                 if (!_subscribers.ContainsKey(t))
                 {
-                    _subscribers[t] = new SubscriberList<ISubscriber>();
+                    _subscribers[t] = new EventSubscriberList<IEventSubscriber>();
                 }
                 _subscribers[t].Add(subscriber);
             }
         }
 
-        public void Unsubscribe(ISubscriber subscriber)
+        public void Unsubscribe(IEventSubscriber subscriber)
         {
             var subscriberTypes = GetSubscriberTypes(subscriber);
             foreach (var t in subscriberTypes)
@@ -63,15 +63,20 @@ namespace m039.Common
                 if (_subscribers.ContainsKey(t))
                 {
                     _subscribers[t].Remove(subscriber);
+
+                    if (_subscribers[t].List.Count <= 0)
+                    {
+                        _subscribers.Remove(t);
+                    }
                 }
             }
         }
 
-        public void Raise<T>(Action<T> action) where T : ISubscriber
+        public void Raise<T>(Action<T> action) where T : IEventSubscriber
         {
             if (!_subscribers.ContainsKey(typeof(T)))
             {
-                Logger.Warning($"Can't raise an event [{typeof(T).Name}], no subscribers.");
+                Logger.Warning($"Can't raise an event [{nameof(T)}], no subscribers.");
                 return;
             }
 
@@ -97,16 +102,22 @@ namespace m039.Common
                     Debug.LogError(e);
                 }
             }
+
             subscribers.Executing = false;
             subscribers.CleanUp();
 
+            if (subscribers.List.Count <= 0)
+            {
+                _subscribers.Remove(typeof(T));
+            }
+
             if (cleanUpCount > 0)
             {
-                Logger.Info($"Cleaned up {cleanUpCount} references of [{typeof(T).Name}].");
+                Logger.Info($"Cleaned up {cleanUpCount} references.");
             }
         }
 
-        List<Type> GetSubscriberTypes(ISubscriber subscriber)
+        List<Type> GetSubscriberTypes(IEventSubscriber subscriber)
         {
             var type = subscriber.GetType();
             if (_cachedSubscriberTypes.ContainsKey(type))
@@ -116,68 +127,12 @@ namespace m039.Common
 
             var subscriberTypes = type
                 .GetInterfaces()
-                .Where(it => typeof(ISubscriber).IsAssignableFrom(it) && it != typeof(ISubscriber))
+                .Where(it => typeof(IEventSubscriber).IsAssignableFrom(it) && it != typeof(IEventSubscriber))
                 .ToList();
 
             _cachedSubscriberTypes[type] = subscriberTypes;
 
             return subscriberTypes;
-        }
-
-        class SubscriberList<T> where T : class
-        {
-            bool _needsCleanUp = false;
-
-            public bool Executing;
-
-            public readonly List<WeakReference> List = new();
-
-            public void Add(T subscriber)
-            {
-                List.Add(new WeakReference(subscriber));
-            }
-
-            public void RemoveAt(int index)
-            {
-                if (Executing)
-                {
-                    _needsCleanUp = true;
-                    List[index] = null;
-                }
-                else
-                {
-                    List.RemoveAt(index);
-                }
-            }
-
-            public void Remove(T subscriber)
-            {
-                if (Executing)
-                {
-                    var i = List.FindIndex(x => x.Target == subscriber);
-                    if (i >= 0)
-                    {
-                        _needsCleanUp = true;
-                        List[i] = null;
-                    }
-                } else
-                {
-                    var i = List.FindIndex(x => x.Target == subscriber);
-                    if (i >= 0)
-                    {
-                        List.RemoveAt(i);
-                    }
-                }
-            }
-
-            public void CleanUp()
-            {
-                if (!_needsCleanUp)
-                    return;
-
-                List.RemoveAll(x => x == null);
-                _needsCleanUp = false;
-            }
         }
     }
 }
