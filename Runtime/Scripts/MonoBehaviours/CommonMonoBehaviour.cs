@@ -3,15 +3,11 @@ using UnityEngine;
 
 namespace m039.Common
 {
-
     public class CommonMonoBehaviour : MonoBehaviour
     {
-
         protected virtual void OnValidate()
         {
-#if false
             CheckFields();
-#endif
         }
 
         void CheckFields()
@@ -29,6 +25,9 @@ namespace m039.Common
                 if (field.GetCustomAttribute<NotRequiredFieldAttribute>() != null)
                     continue;
 
+                if (field.GetCustomAttribute<InjectAttribute>() != null)
+                    continue;
+
                 var value = field.GetValue(this);
                 if (value == null || value.Equals(null))
                 {
@@ -41,5 +40,4 @@ namespace m039.Common
             }
         }
     }
-
 }
