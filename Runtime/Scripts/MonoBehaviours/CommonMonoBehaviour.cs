@@ -9,7 +9,9 @@ namespace m039.Common
 
         protected virtual void OnValidate()
         {
+#if false
             CheckFields();
+#endif
         }
 
         void CheckFields()

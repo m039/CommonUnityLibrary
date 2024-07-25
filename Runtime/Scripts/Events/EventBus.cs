@@ -163,7 +163,10 @@ namespace m039.Common
                 } else
                 {
                     var i = List.FindIndex(x => x.Target == subscriber);
-                    List.RemoveAt(i);
+                    if (i >= 0)
+                    {
+                        List.RemoveAt(i);
+                    }
                 }
             }
 

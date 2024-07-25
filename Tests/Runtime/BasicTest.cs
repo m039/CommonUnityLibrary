@@ -1,217 +1,214 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using m039.Common;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace m039.Common
+public class BasicTest
 {
-    public class BasicTest
+    [Test]
+    public void CollectionPasses()
     {
-        [Test]
-        public void CollectionPasses()
+        var list = new List<int>
         {
-            var list = new List<int>
-            {
-                44,
-                13
-            };
+            44,
+            13
+        };
 
-            Assert.IsTrue(list.Contains(x => x == 13));
-            Assert.IsFalse(list.Contains(x => x == 30));
-        }
+        Assert.IsTrue(list.Contains(x => x == 13));
+        Assert.IsFalse(list.Contains(x => x == 30));
+    }
 
-        [Test]
-        public void LogPasses()
+    [Test]
+    public void LogPasses()
+    {
+        var log = Log.Get<BasicTest>();
+        var str = string.Empty;
+        log.SetPrinter((level, message) =>
         {
-            var log = Log.Get<BasicTest>();
-            var str = string.Empty;
-            log.SetPrinter((level, message) =>
+            if (level == Log.LogLevel.Info)
             {
-                if (level == Log.LogLevel.Info)
-                {
-                    str = "INFO:" + message;
-                } else
-                {
-                    str = "OTHER:" + message;
-                }
-            });
-
-            Assert.IsTrue(string.IsNullOrEmpty(str));
-            log.Info("1");
-            Assert.AreEqual("INFO:[BasicTest] 1", str);
-
-            str = string.Empty;
-            log.Warning("2");
-            Assert.AreEqual("OTHER:[BasicTest] 2", str);
-        }
-
-        static int s_EventPassesCounter = 0;
-
-        [Test]
-        public void EventPasses()
-        {
-            EventBus.Global.Logger.SetEnabled(false);
-
-            EventPassesTest test1 = new();
-            test1.Test();
-
+                str = "INFO:" + message;
+            } else
             {
-                EventPassesTestGC test2 = new();
-                test2.Test();
+                str = "OTHER:" + message;
             }
+        });
 
-            System.GC.Collect();
+        Assert.IsTrue(string.IsNullOrEmpty(str));
+        log.Info("1");
+        Assert.AreEqual("INFO:[BasicTest] 1", str);
+
+        str = string.Empty;
+        log.Warning("2");
+        Assert.AreEqual("OTHER:[BasicTest] 2", str);
+    }
+
+    static int s_EventPassesCounter = 0;
+
+    [Test]
+    public void EventPasses()
+    {
+        EventBus.Global.Logger.SetEnabled(false);
+
+        EventPassesTest test1 = new();
+        test1.Test();
+
+        {
+            EventPassesTestGC test2 = new();
+            test2.Test();
+        }
+
+        System.GC.Collect();
+
+        EventBus.Global.Raise<IEvent4>(a => a.Count());
+        Assert.AreEqual(1, s_EventPassesCounter);
+    }
+
+    [Test]
+    public void ServiceLocatorPasses()
+    {
+        var serviceLocator = ServiceLocator.Global;
+        serviceLocator.Logger.SetEnabled(true);
+
+        Assert.IsFalse(serviceLocator.TryGet<IncService>(out _));
+        var service = new IncService();
+        Assert.AreEqual(10, service.number);
+        serviceLocator.Register<IIncService>(service);
+        serviceLocator.Get<IIncService>().Inc();
+        Assert.AreEqual(11, service.number);
+    }
+
+    interface IIncService
+    {
+        int number { get; }
+        void Inc();
+    }
+
+    class IncService : IIncService
+    {
+        public int number { get; set; } = 10;
+
+        public void Inc() => number++;
+    }
+
+    [UnityTest]
+    public IEnumerator WaitForSecondsPasses()
+    {
+        var completed = false;
+
+        Coroutines.WaitForSeconds(0.5f, () => completed = true);
+
+        Assert.IsTrue(!completed);
+
+        yield return new WaitForSeconds(0.6f);
+
+        Assert.IsTrue(completed);
+    }
+
+    interface IEvent1 : ISubscriber
+    {
+        void AddNumbers(int x);
+    }
+
+    interface IEvent2 : ISubscriber
+    {
+        void AddStrings(string x);
+    }
+
+    interface IEvent3 : ISubscriber
+    {
+        void Unsub();
+    }
+
+    interface IEvent4 : ISubscriber
+    {
+        void Count();
+    }
+
+    class EventPassesTestGC : IEvent4
+    {
+        public void Nothing()
+        {
+
+        }
+
+        public void Test()
+        {
+            Assert.AreEqual(0, s_EventPassesCounter);
+
+            EventBus.Global.Subscribe(this);
 
             EventBus.Global.Raise<IEvent4>(a => a.Count());
+
             Assert.AreEqual(1, s_EventPassesCounter);
         }
 
-        [Test]
-        public void ServiceLocatorPasses()
+        public void Count()
         {
-            var serviceLocator = ServiceLocator.Global;
-            serviceLocator.Logger.SetEnabled(true);
+            s_EventPassesCounter++;
+        }
+    }
 
-            Assert.IsFalse(serviceLocator.TryGet<IncService>(out _));
-            var service = new IncService();
-            Assert.AreEqual(10, service.number);
-            serviceLocator.Register<IIncService>(service);
-            serviceLocator.Get<IIncService>().Inc();
-            Assert.AreEqual(11, service.number);
+    class EventPassesTest : IEvent1, IEvent2, IEvent3
+    {
+        int _number;
+
+        string _string = "";
+
+        int _unsubscribed = 0;
+
+        public void AddNumbers(int x)
+        {
+            _number += x;
         }
 
-        interface IIncService
+        public void AddStrings(string x)
         {
-            int number { get; }
-            void Inc();
+            _string += x;
         }
 
-        class IncService : IIncService
+        public void Unsub()
         {
-            public int number { get; set; } = 10;
-
-            public void Inc() => number++;
+            _unsubscribed++;
+            EventBus.Global.Unsubscribe(this);
         }
 
-        [UnityTest]
-        public IEnumerator WaitForSecondsPasses()
+        public void Test()
         {
-            var completed = false;
+            Assert.AreEqual(_number, 0);
+            Assert.AreEqual(_string, "");
 
-            Coroutines.WaitForSeconds(0.5f, () => completed = true);
+            EventBus.Global.Raise<IEvent1>(a => a.AddNumbers(1));
 
-            Assert.IsTrue(!completed);
+            Assert.AreEqual(0, _number);
 
-            yield return new WaitForSeconds(0.6f);
+            EventBus.Global.Subscribe(this);
 
-            Assert.IsTrue(completed);
-        }
+            EventBus.Global.Raise<IEvent1>(a => a.AddNumbers(1));
+            EventBus.Global.Raise<IEvent1>(a => a.AddNumbers(1));
 
-        interface IEvent1 : ISubscriber
-        {
-            void AddNumbers(int x);
-        }
+            Assert.AreEqual(2, _number);
 
-        interface IEvent2 : ISubscriber
-        {
-            void AddStrings(string x);
-        }
+            EventBus.Global.Raise<IEvent2>(a => a.AddStrings("a"));
+            EventBus.Global.Raise<IEvent2>(a => a.AddStrings("b"));
 
-        interface IEvent3 : ISubscriber
-        {
-            void Unsub();
-        }
+            Assert.AreEqual("ab", _string);
+            Assert.AreEqual(0, _unsubscribed);
 
-        interface IEvent4 : ISubscriber
-        {
-            void Count();
-        }
+            EventBus.Global.Raise<IEvent3>(a => a.Unsub());
+            EventBus.Global.Raise<IEvent1>(a => a.AddNumbers(1));
+            EventBus.Global.Raise<IEvent2>(a => a.AddStrings("a"));
 
-        class EventPassesTestGC : IEvent4
-        {
-            public void Nothing()
-            {
+            Assert.AreEqual(1, _unsubscribed);
 
-            }
+            EventBus.Global.Raise<IEvent3>(a => a.Unsub());
 
-            public void Test()
-            {
-                Assert.AreEqual(0, s_EventPassesCounter);
+            Assert.AreEqual(1, _unsubscribed);
 
-                EventBus.Global.Subscribe(this);
-
-                EventBus.Global.Raise<IEvent4>(a => a.Count());
-
-                Assert.AreEqual(1, s_EventPassesCounter);
-            }
-
-            public void Count()
-            {
-                s_EventPassesCounter++;
-            }
-        }
-
-        class EventPassesTest : IEvent1, IEvent2, IEvent3
-        {
-            int _number;
-
-            string _string = "";
-
-            int _unsubscribed = 0;
-
-            public void AddNumbers(int x)
-            {
-                _number += x;
-            }
-
-            public void AddStrings(string x)
-            {
-                _string += x;
-            }
-
-            public void Unsub()
-            {
-                _unsubscribed++;
-                EventBus.Global.Unsubscribe(this);
-            }
-
-            public void Test()
-            {
-                Assert.AreEqual(_number, 0);
-                Assert.AreEqual(_string, "");
-
-                EventBus.Global.Raise<IEvent1>(a => a.AddNumbers(1));
-
-                Assert.AreEqual(0, _number);
-
-                EventBus.Global.Subscribe(this);
-
-                EventBus.Global.Raise<IEvent1>(a => a.AddNumbers(1));
-                EventBus.Global.Raise<IEvent1>(a => a.AddNumbers(1));
-
-                Assert.AreEqual(2, _number);
-
-                EventBus.Global.Raise<IEvent2>(a => a.AddStrings("a"));
-                EventBus.Global.Raise<IEvent2>(a => a.AddStrings("b"));
-
-                Assert.AreEqual("ab", _string);
-                Assert.AreEqual(0, _unsubscribed);
-
-                EventBus.Global.Raise<IEvent3>(a => a.Unsub());
-                EventBus.Global.Raise<IEvent1>(a => a.AddNumbers(1));
-                EventBus.Global.Raise<IEvent2>(a => a.AddStrings("a"));
-
-                Assert.AreEqual(1, _unsubscribed);
-
-                EventBus.Global.Raise<IEvent3>(a => a.Unsub());
-
-                Assert.AreEqual(1, _unsubscribed);
-
-                Assert.AreEqual(2, _number);
-                Assert.AreEqual("ab", _string);
-            }
+            Assert.AreEqual(2, _number);
+            Assert.AreEqual("ab", _string);
         }
     }
 }
