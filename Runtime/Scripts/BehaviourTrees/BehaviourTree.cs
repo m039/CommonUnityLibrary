@@ -18,11 +18,6 @@ namespace m039.Common.BehaviourTrees
         string name { get; }
     }
 
-    public interface IHasChildren
-    {
-        IList<INode> children { get; }
-    }
-
     public interface INode
     {
         Status Process();
@@ -33,9 +28,14 @@ namespace m039.Common.BehaviourTrees
         }
     }
 
+    public interface ICompositeNode : INode
+    {
+        IList<INode> children { get; }
+    }
+
     public static class NodeExt
     {
-        static Lazy<IList<INode>> Empty = new(() =>
+        static readonly Lazy<IList<INode>> Empty = new(() =>
         {
             return new List<INode>().AsReadOnly();
         });
@@ -62,47 +62,41 @@ namespace m039.Common.BehaviourTrees
         {
             return node switch
             {
-                IHasChildren hasChildren => hasChildren.children,
+                ICompositeNode compositeNode => compositeNode.children,
                 _ => Empty.Value
             };
         }
     }
 
-    public class ActionNode : INode, IHasName
+    public class ActionNode : Node
     {
         readonly Action _doSomething;
 
-        public string name { get; }
-
-        public ActionNode(string name, Action doSomething)
+        public ActionNode(string name, Action doSomething, int priority = 0) : base(name, priority)
         {
-            this.name = name;
             _doSomething = doSomething;
         }
 
-        public Status Process()
+        public override Status Process()
         {
             _doSomething();
             return Status.Success;
         }
     }
 
-    public class ConditionNode : INode, IHasName
+    public class ConditionNode : Node
     {
         readonly Func<bool> _predicate;
 
-        public string name { get; }
-
-        public ConditionNode(string name, Func<bool> predicate)
+        public ConditionNode(string name, Func<bool> predicate, int priority = 0) : base(name, priority)
         {
-            this.name = name;
             _predicate = predicate;
         }
 
-        public Status Process() => _predicate() ? Status.Success : Status.Failure;
+        public override Status Process() => _predicate() ? Status.Success : Status.Failure;
     }
 
-    public class UntilFailNode : Node
+    public class UntilFailNode : CompositeNode
     {
         public UntilFailNode(string name) : base(name) { }
 
@@ -118,7 +112,7 @@ namespace m039.Common.BehaviourTrees
         }
     }
 
-    public class InverterNode : Node
+    public class InverterNode : CompositeNode
     {
         public InverterNode(string name) : base(name) {}
 
@@ -185,7 +179,7 @@ namespace m039.Common.BehaviourTrees
         }
     }
 
-    public class SelectorNode : Node
+    public class SelectorNode : CompositeNode
     {
         public SelectorNode(string name, int priority = 0) : base(name, priority) { }
 
@@ -211,7 +205,7 @@ namespace m039.Common.BehaviourTrees
         }
     }
 
-    public class SequenceNode : Node
+    public class SequenceNode : CompositeNode
     {
         public SequenceNode(string name, int priority = 0) : base(name, priority) {
         }
@@ -238,27 +232,21 @@ namespace m039.Common.BehaviourTrees
         }
     }
 
-    public abstract class Node : INode, IHasChildren, IHasName
+    public abstract class CompositeNode : Node, ICompositeNode
     {
-        public int priority { get; private set; }
-
-        public string name { get; private set; }
+        public int currentChild;
 
         public IList<INode> children { get; private set; } = new List<INode>();
 
-        public int currentChild;
-
-        public Node(string name = "Node", int priority = 0)
+        public CompositeNode(string name = "CompositeNode", int priority = 0) : base(name, priority)
         {
-            this.name = name;
-            this.priority = priority;
         }
 
         public void AddChild(INode node) => children.Add(node);
 
-        public virtual Status Process() => children[currentChild].Process();
+        public override Status Process() => children[currentChild].Process();
 
-        public virtual void Reset()
+        public override void Reset()
         {
             currentChild = 0;
             foreach (var child in children)
@@ -266,6 +254,23 @@ namespace m039.Common.BehaviourTrees
                 child.Reset();
             }
         }
+    }
+
+    public abstract class Node : INode, IHasName, IHasPriority
+    {
+        public int priority { get; private set; }
+
+        public string name { get; private set; }
+
+        public Node(string name = "Node", int priority = 0)
+        {
+            this.name = name;
+            this.priority = priority;
+        }
+
+        public virtual Status Process() => Status.Failure;
+
+        public virtual void Reset() { }
     }
 
     public delegate bool Policy(Status status);
@@ -277,7 +282,7 @@ namespace m039.Common.BehaviourTrees
         public static readonly Policy RunUntilFailure = (status) => status == Status.Failure;
     }
 
-    public class BehaviourTree : Node
+    public class BehaviourTree : CompositeNode
     {
         readonly Policy _policy;
 
