@@ -9,5 +9,6 @@ A library with common for all my projects code and assets.
 * Event buses
 * Dependency Injection
 * Service locator
+* State machine
 * Attributes
 * Easings
