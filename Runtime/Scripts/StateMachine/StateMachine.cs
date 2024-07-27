@@ -36,7 +36,7 @@ namespace m039.Common
                 }
             }
 
-            if (CurrentState != null)
+            if (CurrentState != null && _transitions.ContainsKey(CurrentState))
             {
                 foreach (var transition in _transitions[CurrentState])
                 {
@@ -66,9 +66,8 @@ namespace m039.Common
 
         public void AddTransition(IState from, IState to, Func<bool> condition)
         {
-            Assert.IsNotNull(from);
-            Assert.IsNotNull(to);
-            Assert.IsNotNull(condition);
+            if (from == null || to == null || condition == null)
+                return;
 
             if (!_transitions.ContainsKey(from))
             {
@@ -80,8 +79,8 @@ namespace m039.Common
 
         public void AddAnyTransition(IState to, Func<bool> condition)
         {
-            Assert.IsNotNull(to);
-            Assert.IsNotNull(condition);
+            if (to == null || condition == null)
+                return;
 
             _anyTransitions.Add(new Transition(to, condition));
         }
