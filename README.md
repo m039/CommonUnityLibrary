@@ -10,5 +10,6 @@ A library with common for all my projects code and assets.
 * Dependency Injection
 * Service locator
 * Hierarchical state machine
+* Behaviour trees
 * Attributes
 * Easings
