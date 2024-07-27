@@ -66,7 +66,7 @@ namespace m039.Common
         {
             if (!_subscribers.ContainsKey(typeof(T)))
             {
-                Logger.Warning($"Can't raise an event [{nameof(T)}], no subscribers.");
+                Logger.Warning($"Can't raise an event [{typeof(T).Name}], no subscribers.");
                 return;
             }
 
