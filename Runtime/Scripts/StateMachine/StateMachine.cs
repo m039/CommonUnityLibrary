@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine.Assertions;
 
-namespace m039.Common
+namespace m039.Common.StateMachine
 {
     public interface IState
     {

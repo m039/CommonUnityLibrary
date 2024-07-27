@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System;
 
-namespace m039.Common
+namespace m039.Common.Events
 {
     internal class EventSubscriberList<T> where T : class
     {

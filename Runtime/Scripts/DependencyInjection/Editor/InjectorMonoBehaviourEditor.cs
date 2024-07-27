@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace m039.Common
+namespace m039.Common.DependencyInjection
 {
     [CustomEditor(typeof(InjectorMonoBehaviour))]
     public class InjectorMonoBehaviourEditor : Editor

@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace m039.Common
+namespace m039.Common.DependencyInjection
 {
     [CustomPropertyDrawer(typeof(InjectAttribute))]
     public class InjectPropertyDrawer : PropertyDrawer

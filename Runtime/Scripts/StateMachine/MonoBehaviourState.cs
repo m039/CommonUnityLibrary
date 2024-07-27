@@ -1,9 +1,8 @@
-using m039.Common;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game
+namespace m039.Common.StateMachine
 {
     /// <summary>
     /// Use this class in a hierarchical state machine.
@@ -89,16 +88,26 @@ namespace Game
                 states = new();
             }
 
-            states.Add(this);
-            if (StateMachine.CurrentState == null)
-                return states;
+            IState currentState;
 
-            if (StateMachine.CurrentState is MonoBehaviourState state)
+            if (StateMachine.CurrentState is ProxyState proxyState)
             {
-                return state.GetHierarchicalStatesInternal(states);
+                currentState = proxyState.State;
             } else
             {
-                states.Add(StateMachine.CurrentState);
+                currentState = StateMachine.CurrentState;
+            }
+
+            states.Add(this);
+            if (currentState == null)
+                return states;
+
+            if (currentState is MonoBehaviourState state2)
+            {
+                return state2.GetHierarchicalStatesInternal(states);
+            } else
+            {
+                states.Add(currentState);
             }
 
             return states;

@@ -1,11 +1,10 @@
 using System.Collections;
-using System.Collections.Generic;
-using m039.Common;
+using m039.Common.DependencyInjection;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-public class DITest
+public class DependencyInjectionTest
 {
     [UnityTest]
     public IEnumerator DITestWithEnumeratorPasses()

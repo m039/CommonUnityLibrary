@@ -1,5 +1,5 @@
 using System.Collections;
-using m039.Common;
+using m039.Common.StateMachine;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;

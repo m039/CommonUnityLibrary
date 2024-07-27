@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace m039.Common
+namespace m039.Common.DependencyInjection
 {
     [DefaultExecutionOrder(-1000)]
     public class InjectorMonoBehaviour : CommonMonoBehaviour

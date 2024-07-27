@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
-using m039.Common;
+using m039.Common.Events;
 using NUnit.Framework;
 using UnityEngine.TestTools;
 
-public class EventTest
+public class EventsTest
 {
     static int s_EventPassesCounter = 0;
 

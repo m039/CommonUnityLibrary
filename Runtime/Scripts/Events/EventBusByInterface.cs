@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace m039.Common
+namespace m039.Common.Events
 {
     public interface IEventSubscriber
     {
