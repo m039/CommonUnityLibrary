@@ -268,7 +268,7 @@ namespace m039.Common.BehaviourTrees
             this.priority = priority;
         }
 
-        public virtual Status Process() => Status.Failure;
+        public abstract Status Process();
 
         public virtual void Reset() { }
     }
