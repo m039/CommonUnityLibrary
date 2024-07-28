@@ -49,9 +49,17 @@ namespace m039.Common.DependencyInjection
             var monoBehaviours = FindMonoBehaviours();
 
             var providers = monoBehaviours.OfType<IDependencyProvider>();
+            var providersExists = false;
+
             foreach (var provider in providers)
             {
                 RegisterInternal(provider);
+                providersExists = true;
+            }
+
+            if (!providersExists)
+            {
+                Logger.Warning($"There are no dependency providers. Add {nameof(IDependencyProvider)} to a MonoBehavior.");
             }
 
             var injectables = monoBehaviours.Where(IsInjectable);

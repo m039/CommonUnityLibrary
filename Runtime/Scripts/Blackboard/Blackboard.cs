@@ -47,7 +47,6 @@ namespace m039.Common.Blackboard
     [Serializable]
     public class Blackboard
     {
-        readonly Dictionary<string, BlackboardKey> _keyRegistry = new();
         readonly Dictionary<BlackboardKey, object> _entries = new();
 
         public void Debug()
@@ -91,17 +90,6 @@ namespace m039.Common.Blackboard
         public void SetValue<T>(BlackboardKey key, T value)
         {
             _entries[key] = new BlackboardEntry<T>(key, value);
-        }
-
-        public BlackboardKey GetOrRegisterKey(string keyName)
-        {
-            if (!_keyRegistry.TryGetValue(keyName, out BlackboardKey key))
-            {
-                key = new BlackboardKey(keyName);
-                _keyRegistry[keyName] = key;
-            }
-
-            return key;
         }
 
         public bool ContainsKey(BlackboardKey key) => _entries.ContainsKey(key);

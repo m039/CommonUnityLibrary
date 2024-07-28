@@ -31,7 +31,9 @@ namespace m039.Common
             }
         }
 
-        protected abstract void Init();
+        protected virtual void Init()
+        {
+        }
 
         protected virtual void DoDestroy()
         {

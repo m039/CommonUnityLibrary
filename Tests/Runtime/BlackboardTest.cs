@@ -7,7 +7,7 @@ public class BlackboardTest
     public void BlackboardTestSimplePasses()
     {
         var blackboard = new Blackboard();
-        var key11 = blackboard.GetOrRegisterKey("key11");
+        var key11 = new BlackboardKey("key11");
         int value;
 
         if (blackboard.TryGetValue(key11, out int _))

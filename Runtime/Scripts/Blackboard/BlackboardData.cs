@@ -28,7 +28,7 @@ namespace m039.Common.Blackboard
 
         public void SetValueOnBlackboard(Blackboard blackboard)
         {
-            var key = blackboard.GetOrRegisterKey(keyName);
+            var key = new BlackboardKey(keyName);
             setValueDispatchTable[value.type](blackboard, key, value);
         }
 
