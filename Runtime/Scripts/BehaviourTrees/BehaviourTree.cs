@@ -242,7 +242,14 @@ namespace m039.Common.BehaviourTrees
         {
         }
 
-        public void AddChild(INode node) => children.Add(node);
+        public void AddChild(INode node)
+        {
+            if (node == null) {
+                Debug.LogError("AddChild: Failed to add a node");
+                return;
+            }
+            children.Add(node);
+        }
 
         public override Status Process() => children[currentChild].Process();
 
@@ -298,6 +305,12 @@ namespace m039.Common.BehaviourTrees
 
         public override Status Process()
         {
+            if (children.Count <= 0)
+            {
+                Debug.LogError("No childs");
+                return Status.Failure;
+            }
+
             var status = children[currentChild].Process();
             if (_policy(status))
             {
