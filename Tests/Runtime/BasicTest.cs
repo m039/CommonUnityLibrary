@@ -57,6 +57,23 @@ public class BasicTest
         serviceLocator.Register<IIncService>(service);
         serviceLocator.Get<IIncService>().Inc();
         Assert.AreEqual(11, service.number);
+
+        var service2 = new IncService();
+        const int service2Id = 1;
+        Assert.AreEqual(10, service2.number);
+        serviceLocator.Register<IIncService>(service2Id, service2);
+        Assert.AreEqual(service2, serviceLocator.Get<IIncService>(service2Id));
+        serviceLocator.Get<IIncService>(service2Id).Inc();
+        serviceLocator.Get<IIncService>(service2Id).Inc();
+        Assert.AreEqual(12, service2.number);
+
+        serviceLocator.Unregister<IIncService>();
+        Assert.IsFalse(serviceLocator.TryGet(out IIncService _));
+
+        Assert.IsTrue(serviceLocator.TryGet(service2Id, out IIncService _));
+        serviceLocator.Unregister<IIncService>(service2Id);
+
+        Assert.IsFalse(serviceLocator.TryGet(service2Id, out IIncService _));
     }
 
     interface IIncService
