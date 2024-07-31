@@ -15,7 +15,7 @@ namespace m039.Common
             {
                 s_Instance = (T)this;
 
-                Init();
+                DoAwake();
             } else
             {
                 Destroy(gameObject);
@@ -31,7 +31,7 @@ namespace m039.Common
             }
         }
 
-        protected virtual void Init()
+        protected virtual void DoAwake()
         {
         }
 

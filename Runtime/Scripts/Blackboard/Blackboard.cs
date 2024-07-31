@@ -95,6 +95,8 @@ namespace m039.Common.Blackboard
         public bool ContainsKey(BlackboardKey key) => _entries.ContainsKey(key);
 
         public void Remove(BlackboardKey key) => _entries.Remove(key);
+
+        public void Clear() => _entries.Clear();
     }
 
 }

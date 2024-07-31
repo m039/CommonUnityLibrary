@@ -20,7 +20,7 @@ namespace m039.Common
             }
         }
 
-        protected override void Init()
+        protected override void DoAwake()
         {
             DontDestroyOnLoad(gameObject);
         }
