@@ -86,6 +86,12 @@ namespace m039.Common
 
         public ServiceLocator Register(int key, Type type, object service)
         {
+            if (service == null)
+            {
+                Logger.Error($"Can't register the service of type {type.FullName} with {key} key. It is null.");
+                return this;
+            }
+
             if (!type.IsInstanceOfType(service))
             {
                 throw new ArgumentException("Type of service does not match type of service interface", nameof(service));
