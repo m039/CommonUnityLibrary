@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
 
 namespace m039.Common.Blackboard
@@ -29,7 +30,7 @@ namespace m039.Common.Blackboard
     }
 
     [Serializable]
-    public class BlackboardEntry<T>
+    public readonly struct BlackboardEntry<T>
     {
         public BlackboardKey Key { get; }
         public T Value { get; }
