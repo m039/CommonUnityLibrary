@@ -35,6 +35,26 @@ namespace m039.Common
             return vector;
         }
 
+        public static Vector3 With(this Vector3 vector, float? x = null, float? y = null, float? z = null)
+        {
+            if (x.HasValue)
+            {
+                vector.x = x.Value;
+            }
+
+            if (y.HasValue)
+            {
+                vector.y = y.Value;
+            }
+
+            if (z.HasValue)
+            {
+                vector.z = z.Value;
+            }
+
+            return vector;
+        }
+
         public static string GetPath(this Transform current)
         {
             if (current == null)
