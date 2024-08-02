@@ -4,18 +4,18 @@ using UnityEngine;
 namespace m039.Common
 {
     [System.Serializable]
-    public struct MinMaxInt
+    public struct MinMaxFloat
     {
-        public int min;
-        public int max;
+        public float min;
+        public float max;
 
-        public MinMaxInt(int min, int max)
+        public MinMaxFloat(float min, float max)
         {
             this.min = min;
             this.max = max;
         }
 
-        public readonly int Random()
+        public readonly float Random()
         {
             if (min > max)
                 return max;
@@ -25,8 +25,8 @@ namespace m039.Common
     }
 
 #if UNITY_EDITOR
-    [CustomPropertyDrawer(typeof(MinMaxInt))]
-    public class MinMaxIntPropertyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(MinMaxFloat))]
+    public class MinMaxFloatPropertyDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -36,7 +36,7 @@ namespace m039.Common
 
             const float LabelWidth = 40;
             const float Gap = 5;
-                        
+
             var minProperty = property.FindPropertyRelative("min");
             var maxProperty = property.FindPropertyRelative("max");
 

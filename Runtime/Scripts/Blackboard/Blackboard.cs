@@ -1,9 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Text;
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
-using UnityEngine;
 
 namespace m039.Common.Blackboard
 {
@@ -73,6 +70,19 @@ namespace m039.Common.Blackboard
             } else
             {
                 UnityEngine.Debug.Log("The blackboard is empty.");
+            }
+        }
+
+        public bool TryGetValue(BlackboardKey key, out object value)
+        {
+            if (_entries.TryGetValue(key, out var entry))
+            {
+                value = entry.GetType().GetProperty("Value").GetValue(entry);
+                return true;
+            } else
+            {
+                value = null;
+                return false;
             }
         }
 
