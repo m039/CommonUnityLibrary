@@ -20,7 +20,7 @@ namespace m039.Common
             if (min > max)
                 return max;
 
-            return UnityEngine.Random.Range(min, max + 1);
+            return UnityEngine.Random.Range(min, max);
         }
     }
 
