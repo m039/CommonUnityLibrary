@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,12 +8,12 @@ namespace m039.Common.Blackboard
     [Serializable]
     public readonly struct BlackboardKey : IEquatable<BlackboardKey>
     {
-        readonly string _name;
+        public readonly string name;
         readonly int _hashedKey;
 
         public BlackboardKey(string name)
         {
-            _name = name;
+            this.name = name;
             _hashedKey = name.ComputeFNV1aHash();
         }
 
@@ -20,7 +21,7 @@ namespace m039.Common.Blackboard
 
         public override bool Equals(object obj) => obj is BlackboardKey other && Equals(other);
         public override int GetHashCode() => _hashedKey;
-        public override string ToString() => _name;
+        public override string ToString() => name;
 
         public static bool operator ==(BlackboardKey lhs, BlackboardKey rhs) => lhs._hashedKey == rhs._hashedKey;
         public static bool operator !=(BlackboardKey lhs, BlackboardKey rhs) => !(lhs == rhs);
@@ -39,13 +40,24 @@ namespace m039.Common.Blackboard
         }
 
         public override bool Equals(object obj) => obj is BlackboardEntry<T> other && other.Key == Key;
+
         public override int GetHashCode() => Key.GetHashCode();
+
+        public override string ToString()
+        {
+            return Value.ToString(); ;
+        }
     }
 
     [Serializable]
     public class Blackboard
     {
         readonly Dictionary<BlackboardKey, object> _entries = new();
+
+        public Dictionary<BlackboardKey, object>.Enumerator GetEnumerator()
+        {
+            return _entries.GetEnumerator();
+        }
 
         public void Debug()
         {
@@ -70,6 +82,28 @@ namespace m039.Common.Blackboard
             } else
             {
                 UnityEngine.Debug.Log("The blackboard is empty.");
+            }
+        }
+
+        public T GetValue<T>(BlackboardKey key, T @default)
+        {
+            if (TryGetValue(key, out T v))
+            {
+                return v;
+            }
+            else
+            {
+                return @default;
+            }
+        }
+
+        public object GetValue(BlackboardKey key, object @default) {
+            if (TryGetValue(key, out object v))
+            {
+                return v;
+            } else
+            {
+                return @default;
             }
         }
 
@@ -108,6 +142,8 @@ namespace m039.Common.Blackboard
         public void Remove(BlackboardKey key) => _entries.Remove(key);
 
         public void Clear() => _entries.Clear();
+
+        public int Count => _entries.Count;
     }
 
 }
