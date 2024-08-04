@@ -33,11 +33,11 @@ namespace m039.Common.Blackboard
         }
 
         static Dictionary<AnyValue.ValueType, Action<Blackboard, BlackboardKey, AnyValue>> setValueDispatchTable = new() {
-            { AnyValue.ValueType.Int, (blackboard, key, anyValue) => blackboard.SetValue<int>(key, anyValue) },
-            { AnyValue.ValueType.Float, (blackboard, key, anyValue) => blackboard.SetValue<float>(key, anyValue) },
-            { AnyValue.ValueType.Bool, (blackboard, key, anyValue) => blackboard.SetValue<bool>(key, anyValue) },
-            { AnyValue.ValueType.String, (blackboard, key, anyValue) => blackboard.SetValue<string>(key, anyValue) },
-            { AnyValue.ValueType.Vector3, (blackboard, key, anyValue) => blackboard.SetValue<Vector3>(key, anyValue) },
+            { AnyValue.ValueType.Int, (blackboard, key, anyValue) => blackboard.SetValueRaw<int>(key, anyValue) },
+            { AnyValue.ValueType.Float, (blackboard, key, anyValue) => blackboard.SetValueRaw<float>(key, anyValue) },
+            { AnyValue.ValueType.Bool, (blackboard, key, anyValue) => blackboard.SetValueRaw<bool>(key, anyValue) },
+            { AnyValue.ValueType.String, (blackboard, key, anyValue) => blackboard.SetValueRaw<string>(key, anyValue) },
+            { AnyValue.ValueType.Vector3, (blackboard, key, anyValue) => blackboard.SetValueRaw<Vector3>(key, anyValue) },
         };
 
         public void OnBeforeSerialize() {}
