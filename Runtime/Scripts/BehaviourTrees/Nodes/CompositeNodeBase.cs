@@ -27,9 +27,9 @@ namespace m039.Common.BehaviourTrees.Nodes
         protected override void OnReset()
         {
             currentChild = 0;
-            foreach (var child in children)
+            for (int i = 0; i < children.Count; i++)
             {
-                child.Reset();
+                children[i].Reset();
             }
         }
     }

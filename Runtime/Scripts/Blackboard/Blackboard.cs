@@ -45,7 +45,7 @@ namespace m039.Common.Blackboard
 
         public override string ToString()
         {
-            return Value.ToString(); ;
+            return Value.ToString();
         }
     }
 
