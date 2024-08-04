@@ -1,8 +1,12 @@
 {
-    "name": "m039.Common",
+    "name": "m039.Common.Editor",
     "rootNamespace": "",
-    "references": [],
-    "includePlatforms": [],
+    "references": [
+        "GUID:c00d337cb7c72ff448e65f72e45aa009"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

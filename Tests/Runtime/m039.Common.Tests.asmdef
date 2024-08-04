@@ -2,7 +2,7 @@
     "name": "m039.Common.Tests",
     "rootNamespace": "",
     "references": [
-        "Common",
+        "m039.Common",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
