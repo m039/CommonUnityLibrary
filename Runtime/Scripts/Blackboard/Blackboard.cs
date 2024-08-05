@@ -60,7 +60,7 @@ namespace m039.Common.Blackboard
     [Serializable]
     public abstract class BlackboardBase
     {
-        public T GetValue<T>(BlackboardKey<T> key, T @default)
+        public T GetValue<T>(BlackboardKey<T> key, T @default = default)
         {
             if (TryGetValue(key, out T v))
             {
@@ -69,6 +69,17 @@ namespace m039.Common.Blackboard
             else
             {
                 return @default;
+            }
+        }
+
+        public void UpdateValue<T>(BlackboardKey<T> key, Func<T, T> callback, T @default = default)
+        {
+            if (TryGetValue(key, out T v))
+            {
+                SetValue(key, callback(v));
+            } else
+            {
+                SetValue(key, callback(@default));
             }
         }
 
@@ -81,50 +92,38 @@ namespace m039.Common.Blackboard
         public abstract void Remove<T>(BlackboardKey<T> key);
 
         public abstract void Clear();
+
+        public abstract int Count { get; }
     }
 
     public class Blackboard : BlackboardBase
     {
         static readonly Dictionary<Type, Queue<BlackboardEntry>> s_EntryCache = new();
 
-        static readonly Dictionary<Type, Dictionary<string, BlackboardKey>> s_KeyCache = new();
-
         readonly Dictionary<BlackboardKey, BlackboardEntry> _entries = new();
-
-        public void PrintDebug()
-        {
-            var sb = new StringBuilder();
-
-            foreach (var entry in _entries)
-            {
-                var entryType = entry.Value.GetType();
-
-                if (entryType.IsGenericType && entryType.GetGenericTypeDefinition() == typeof(BlackboardEntry<>))
-                {
-                    var valueProperty = entryType.GetProperty("Value");
-                    if (valueProperty == null) continue;
-                    var value = valueProperty.GetValue(entry.Value);
-                    sb.AppendLine($"Key: {entry.Key}, Value: {value}");
-                }
-            }
-
-            if (sb.Length > 0)
-            {
-                UnityEngine.Debug.Log(sb.ToString());
-            } else
-            {
-                UnityEngine.Debug.Log("The blackboard is empty.");
-            }
-        }
 
         public T GetValueRaw<T>(BlackboardKey key, T @default)
         {
-            return GetValue(GetKey<T>(key), @default);
+            if (TryGetValueRaw(key, out T v))
+            {
+                return v;
+            }
+            else
+            {
+                return @default;
+            }
         }
 
         public bool TryGetValueRaw<T>(BlackboardKey key, out T value)
         {
-            return TryGetValue(GetKey<T>(key), out value);
+            if (_entries.TryGetValue(key, out var entry) && entry is BlackboardEntry<T> castedEntry)
+            {
+                value = castedEntry.Value;
+                return true;
+            }
+
+            value = default;
+            return false;
         }
 
         public override bool TryGetValue<T>(BlackboardKey<T> key, out T value)
@@ -141,7 +140,20 @@ namespace m039.Common.Blackboard
 
         public void SetValueRaw<T>(BlackboardKey key, T value)
         {
-            SetValue(GetKey<T>(key), value);
+            if (_entries.TryGetValue(key, out BlackboardEntry entry1))
+            {
+                if (entry1 is BlackboardEntry<T> castedEntry)
+                {
+                    castedEntry.Value = value;
+                    return;
+                } else {
+                    ReleaseEntry(entry1);
+                }
+            }
+
+            var entry2 = GetEntry<T>();
+            entry2.Value = value;
+            _entries[key] = entry2;
         }
 
         public override void SetValue<T>(BlackboardKey<T> key, T value)
@@ -158,7 +170,7 @@ namespace m039.Common.Blackboard
 
         public override bool ContainsKey<T>(BlackboardKey<T> key) => _entries.ContainsKey(key);
 
-        public void Remove(BlackboardKey key)
+        public void RemoveRaw(BlackboardKey key)
         {
             if (_entries.TryGetValue(key, out BlackboardEntry entry))
             {
@@ -178,9 +190,16 @@ namespace m039.Common.Blackboard
             _entries.Remove(key);
         }
 
-        public override void Clear() => _entries.Clear();
+        public override void Clear()
+        {
+            foreach (var e in _entries.Values)
+            {
+                ReleaseEntry(e);
+            }
+            _entries.Clear();
+        }
 
-        public int Count => _entries.Count;
+        public override int Count => _entries.Count;
 
         static BlackboardEntry<T> GetEntry<T>()
         {
@@ -211,30 +230,31 @@ namespace m039.Common.Blackboard
             s_EntryCache[type].Enqueue(entry);
         }
 
-        static BlackboardKey<T> GetKey<T>(BlackboardKey key)
+        public void PrintDebug()
         {
-            return GetKey<T>(key.name);
-        }
+            var sb = new StringBuilder();
 
-        static BlackboardKey<T> GetKey<T>(string name)
-        {
-            var type = typeof(T);
-            if (!s_KeyCache.ContainsKey(type))
+            foreach (var entry in _entries)
             {
-                s_KeyCache[type] = new();
+                var entryType = entry.Value.GetType();
+
+                if (entryType.IsGenericType && entryType.GetGenericTypeDefinition() == typeof(BlackboardEntry<>))
+                {
+                    var valueProperty = entryType.GetProperty("Value");
+                    if (valueProperty == null) continue;
+                    var value = valueProperty.GetValue(entry.Value);
+                    sb.AppendLine($"Key: {entry.Key}, Value: {value}");
+                }
             }
 
-            if (s_KeyCache[type].ContainsKey(name))
+            if (sb.Length > 0)
             {
-                return (BlackboardKey<T>)s_KeyCache[type][name];
+                UnityEngine.Debug.Log(sb.ToString());
             }
             else
             {
-                var key = new BlackboardKey<T>(name);
-                s_KeyCache[type][name] = key;
-                return key;
+                UnityEngine.Debug.Log("The blackboard is empty.");
             }
         }
     }
-
 }
