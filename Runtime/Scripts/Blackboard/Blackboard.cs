@@ -1,7 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 
 namespace m039.Common.Blackboard
@@ -47,7 +45,8 @@ namespace m039.Common.Blackboard
             if (s_Dict.ContainsKey(name))
             {
                 return s_Dict[name];
-            } else
+            }
+            else
             {
                 return s_Dict[name] = new BlackboardKey<T>(name);
             }
@@ -213,7 +212,7 @@ namespace m039.Common.Blackboard
 
         public int Count => _entries.Count;
 
-        public static BlackboardEntry<T> GetEntry<T>(BlackboardKey<T> key)
+        static BlackboardEntry<T> GetEntry<T>(BlackboardKey<T> key)
         {
             var type = typeof(T);
 
@@ -230,7 +229,7 @@ namespace m039.Common.Blackboard
             return entry;
         }
 
-        public static void ReleaseEntry(BlackboardEntry entry)
+        static void ReleaseEntry(BlackboardEntry entry)
         {
             var type = entry.GetValueType();
             entry.Clear();
