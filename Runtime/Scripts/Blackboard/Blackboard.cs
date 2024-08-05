@@ -150,7 +150,7 @@ namespace m039.Common.Blackboard
                 ((BlackboardEntry<T>)entry1).Value = value;
             } else
             {
-                var entry2 = GetEntry(key);
+                var entry2 = GetEntry<T>();
                 entry2.Value = value;
                 _entries[key] = entry2;
             }
@@ -182,7 +182,7 @@ namespace m039.Common.Blackboard
 
         public int Count => _entries.Count;
 
-        static BlackboardEntry<T> GetEntry<T>(BlackboardKey<T> key)
+        static BlackboardEntry<T> GetEntry<T>()
         {
             var type = typeof(T);
 
