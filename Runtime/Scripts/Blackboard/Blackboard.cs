@@ -29,27 +29,8 @@ namespace m039.Common.Blackboard
 
     public class BlackboardKey<T> : BlackboardKey
     {
-        static readonly Dictionary<string, BlackboardKey<T>> s_Dict = new();
-
         public BlackboardKey(string name) : base(name)
         {
-        }
-
-        public static BlackboardKey<T> Get(BlackboardKey key)
-        {
-            return Get(key.name);
-        }
-
-        public static BlackboardKey<T> Get(string name)
-        {
-            if (s_Dict.ContainsKey(name))
-            {
-                return s_Dict[name];
-            }
-            else
-            {
-                return s_Dict[name] = new BlackboardKey<T>(name);
-            }
         }
     }
 
@@ -61,21 +42,9 @@ namespace m039.Common.Blackboard
         public abstract void Clear();
     }
 
-    [Serializable]
     public class BlackboardEntry<T> : BlackboardEntry
     {
-        public BlackboardKey<T> Key { get; set; }
-
         public T Value { get; set; }
-
-        public override bool Equals(object obj) => obj is BlackboardEntry<T> other && other.Key == Key;
-
-        public override int GetHashCode() => Key.GetHashCode();
-
-        public override string ToString()
-        {
-            return Value.ToString();
-        }
 
         public override Type GetValueType()
         {
@@ -114,10 +83,11 @@ namespace m039.Common.Blackboard
         public abstract void Clear();
     }
 
-    [Serializable]
     public class Blackboard : BlackboardBase
     {
         static readonly Dictionary<Type, Queue<BlackboardEntry>> s_EntryCache = new();
+
+        static readonly Dictionary<Type, Dictionary<string, BlackboardKey>> s_KeyCache = new();
 
         readonly Dictionary<BlackboardKey, BlackboardEntry> _entries = new();
 
@@ -149,12 +119,12 @@ namespace m039.Common.Blackboard
 
         public T GetValueRaw<T>(BlackboardKey key, T @default)
         {
-            return GetValue(BlackboardKey<T>.Get(key), @default);
+            return GetValue(GetKey<T>(key), @default);
         }
 
         public bool TryGetValueRaw<T>(BlackboardKey key, out T value)
         {
-            return TryGetValue(BlackboardKey<T>.Get(key), out value);
+            return TryGetValue(GetKey<T>(key), out value);
         }
 
         public override bool TryGetValue<T>(BlackboardKey<T> key, out T value)
@@ -171,7 +141,7 @@ namespace m039.Common.Blackboard
 
         public void SetValueRaw<T>(BlackboardKey key, T value)
         {
-            SetValue(BlackboardKey<T>.Get(key), value);
+            SetValue(GetKey<T>(key), value);
         }
 
         public override void SetValue<T>(BlackboardKey<T> key, T value)
@@ -225,7 +195,6 @@ namespace m039.Common.Blackboard
             {
                 entry = new BlackboardEntry<T>();
             }
-            entry.Key = key;
             return entry;
         }
 
@@ -240,6 +209,31 @@ namespace m039.Common.Blackboard
             }
 
             s_EntryCache[type].Enqueue(entry);
+        }
+
+        static BlackboardKey<T> GetKey<T>(BlackboardKey key)
+        {
+            return GetKey<T>(key.name);
+        }
+
+        static BlackboardKey<T> GetKey<T>(string name)
+        {
+            var type = typeof(T);
+            if (!s_KeyCache.ContainsKey(type))
+            {
+                s_KeyCache[type] = new();
+            }
+
+            if (s_KeyCache[type].ContainsKey(name))
+            {
+                return (BlackboardKey<T>)s_KeyCache[type][name];
+            }
+            else
+            {
+                var key = new BlackboardKey<T>(name);
+                s_KeyCache[type][name] = key;
+                return key;
+            }
         }
     }
 
