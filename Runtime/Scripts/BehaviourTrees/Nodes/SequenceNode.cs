@@ -6,7 +6,8 @@ namespace m039.Common.BehaviourTrees.Nodes
         {
             for (; currentChild < children.Count; currentChild++)
             {
-                switch (children[currentChild].Process())
+                var status = children[currentChild].Process();
+                switch (status)
                 {
                     case Status.Running:
                         return Status.Running;

@@ -55,9 +55,17 @@ namespace m039.Common.Blackboard
     }
 
     [Serializable]
-    public class BlackboardEntry<T>
+    public abstract class BlackboardEntry
     {
-        public BlackboardKey<T> Key { get; private set; }
+        public abstract Type GetValueType();
+
+        public abstract void Clear();
+    }
+
+    [Serializable]
+    public class BlackboardEntry<T> : BlackboardEntry
+    {
+        public BlackboardKey<T> Key { get; set; }
 
         public T Value { get; set; }
 
@@ -70,34 +78,32 @@ namespace m039.Common.Blackboard
             return Value.ToString();
         }
 
-        static readonly Queue s_Cache = new();
-
-        public static BlackboardEntry<T> Get(BlackboardKey<T> key)
+        public override Type GetValueType()
         {
-            BlackboardEntry<T> entry;
-            if (s_Cache.Count > 0)
-            {
-                entry = (BlackboardEntry<T>)s_Cache.Dequeue();
-            }
-            else
-            {
-                entry = new BlackboardEntry<T>();
-            }
-            entry.Key = key;
-            return entry;
+            return typeof(T);
         }
 
-        public static void Release(BlackboardEntry<T> entry)
+        public override void Clear()
         {
-            entry.Value = default;
-
-            s_Cache.Enqueue(entry);
+            Value = default;
         }
     }
 
     [Serializable]
     public abstract class BlackboardBase
     {
+        public T GetValue<T>(BlackboardKey<T> key, T @default)
+        {
+            if (TryGetValue(key, out T v))
+            {
+                return v;
+            }
+            else
+            {
+                return @default;
+            }
+        }
+
         public abstract bool TryGetValue<T>(BlackboardKey<T> key, out T value);
 
         public abstract void SetValue<T>(BlackboardKey<T> key, T value);
@@ -107,23 +113,14 @@ namespace m039.Common.Blackboard
         public abstract void Remove<T>(BlackboardKey<T> key);
 
         public abstract void Clear();
-
-        public abstract int Count { get; }
     }
 
     [Serializable]
     public class Blackboard : BlackboardBase
     {
-        static readonly object[] s_RemoveArgs = new object[1];
+        static readonly Dictionary<Type, Queue<BlackboardEntry>> s_EntryCache = new();
 
-        static readonly Dictionary<Type, MethodInfo> s_RemoveMethods = new();
-
-        readonly Dictionary<BlackboardKey, object> _entries = new();
-
-        public Dictionary<BlackboardKey, object>.Enumerator GetEnumerator()
-        {
-            return _entries.GetEnumerator();
-        }
+        readonly Dictionary<BlackboardKey, BlackboardEntry> _entries = new();
 
         public void PrintDebug()
         {
@@ -156,18 +153,6 @@ namespace m039.Common.Blackboard
             return GetValue(BlackboardKey<T>.Get(key), @default);
         }
 
-        public T GetValue<T>(BlackboardKey<T> key, T @default)
-        {
-            if (TryGetValue(key, out T v))
-            {
-                return v;
-            }
-            else
-            {
-                return @default;
-            }
-        }
-
         public bool TryGetValueRaw<T>(BlackboardKey key, out T value)
         {
             return TryGetValue(BlackboardKey<T>.Get(key), out value);
@@ -175,9 +160,9 @@ namespace m039.Common.Blackboard
 
         public override bool TryGetValue<T>(BlackboardKey<T> key, out T value)
         {
-            if (_entries.TryGetValue(key, out var entry) && entry is BlackboardEntry<T> castedEntry)
+            if (_entries.TryGetValue(key, out var entry))
             {
-                value = castedEntry.Value;
+                value = ((BlackboardEntry<T>)entry).Value;
                 return true;
             }
 
@@ -192,11 +177,11 @@ namespace m039.Common.Blackboard
 
         public override void SetValue<T>(BlackboardKey<T> key, T value)
         {
-            if (_entries.TryGetValue(key, out object entry1) && entry1 is BlackboardEntry<T> castedEntry) {
-                castedEntry.Value = value;
+            if (_entries.TryGetValue(key, out BlackboardEntry entry1)) {
+                ((BlackboardEntry<T>)entry1).Value = value;
             } else
             {
-                var entry2 = BlackboardEntry<T>.Get(key);
+                var entry2 = GetEntry(key);
                 entry2.Value = value;
                 _entries[key] = entry2;
             }
@@ -206,17 +191,9 @@ namespace m039.Common.Blackboard
 
         public void Remove(BlackboardKey key)
         {
-            if (_entries.TryGetValue(key, out object entry))
+            if (_entries.TryGetValue(key, out BlackboardEntry entry))
             {
-                var type = entry.GetType();
-
-                if (!s_RemoveMethods.ContainsKey(type))
-                {
-                    s_RemoveMethods[type] = entry.GetType().GetMethod("Release");
-                }
-
-                s_RemoveArgs[0] = entry;
-                s_RemoveMethods[type].Invoke(null, s_RemoveArgs);
+                ReleaseEntry(entry);
             }
 
             _entries.Remove(key);
@@ -224,9 +201,9 @@ namespace m039.Common.Blackboard
 
         public override void Remove<T>(BlackboardKey<T> key)
         {
-            if (_entries.TryGetValue(key, out object entry) && entry is BlackboardEntry<T> castedEntry)
+            if (_entries.TryGetValue(key, out BlackboardEntry entry))
             {
-                BlackboardEntry<T>.Release(castedEntry);
+                ReleaseEntry(entry);
             }
 
             _entries.Remove(key);
@@ -234,7 +211,37 @@ namespace m039.Common.Blackboard
 
         public override void Clear() => _entries.Clear();
 
-        public override int Count => _entries.Count;
+        public int Count => _entries.Count;
+
+        public static BlackboardEntry<T> GetEntry<T>(BlackboardKey<T> key)
+        {
+            var type = typeof(T);
+
+            BlackboardEntry<T> entry;
+            if (s_EntryCache.ContainsKey(type) && s_EntryCache[type].Count > 0)
+            {
+                entry = (BlackboardEntry<T>)s_EntryCache[type].Dequeue();
+            }
+            else
+            {
+                entry = new BlackboardEntry<T>();
+            }
+            entry.Key = key;
+            return entry;
+        }
+
+        public static void ReleaseEntry(BlackboardEntry entry)
+        {
+            var type = entry.GetValueType();
+            entry.Clear();
+
+            if (!s_EntryCache.ContainsKey(type))
+            {
+                s_EntryCache[type] = new();
+            }
+
+            s_EntryCache[type].Enqueue(entry);
+        }
     }
 
 }

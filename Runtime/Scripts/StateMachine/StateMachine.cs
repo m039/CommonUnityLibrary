@@ -26,8 +26,10 @@ namespace m039.Common.StateMachine
         {
             CurrentState?.OnUpdate();
 
-            foreach (var transition in _anyTransitions)
+            for (int i = 0; i < _anyTransitions.Count; i++)
             {
+                var transition = _anyTransitions[i];
+
                 if (transition.condition())
                 {
                     SetState(transition.to);
@@ -37,8 +39,10 @@ namespace m039.Common.StateMachine
 
             if (CurrentState != null && _transitions.ContainsKey(CurrentState))
             {
-                foreach (var transition in _transitions[CurrentState])
+                var transitions = _transitions[CurrentState];
+                for (int i = 0; i < transitions.Count; i++)
                 {
+                    var transition = transitions[i];
                     if (transition.condition())
                     {
                         SetState(transition.to);
