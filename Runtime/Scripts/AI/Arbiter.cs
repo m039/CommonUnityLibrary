@@ -52,6 +52,11 @@ namespace m039.Common.AI
             {
                 _randomizer[Random.Range(0, randomizerIndex)]?.Execute();
             }
+
+            foreach (IExpert expert in _experts)
+            {
+                expert.AfterAllExecute();
+            }
         }
     }
 }

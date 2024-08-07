@@ -1,9 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
+using UnityEngine.Profiling;
 
 namespace m039.Common.Blackboard
 {
+    public interface IReleasable
+    {
+        void Release();
+    }
+
     [Serializable]
     public class BlackboardKey : IEquatable<BlackboardKey>
     {
@@ -46,6 +53,12 @@ namespace m039.Common.Blackboard
     {
         public T Value { get; set; }
 
+        static readonly bool s_IsReleasable;
+
+        static BlackboardEntry() {
+            s_IsReleasable = typeof(IReleasable).IsAssignableFrom(typeof(T));
+        }
+
         public override Type GetValueType()
         {
             return typeof(T);
@@ -53,6 +66,10 @@ namespace m039.Common.Blackboard
 
         public override void Clear()
         {
+            if (s_IsReleasable && Value is IReleasable releasable)
+            {
+                releasable.Release();
+            }
             Value = default;
         }
     }
@@ -186,7 +203,7 @@ namespace m039.Common.Blackboard
             {
                 ReleaseEntry(entry);
             }
-
+            
             _entries.Remove(key);
         }
 

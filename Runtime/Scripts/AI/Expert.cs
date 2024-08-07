@@ -4,5 +4,6 @@ namespace m039.Common.AI
     {
         int GetInsistence();
         void Execute();
+        void AfterAllExecute();
     }
 }
