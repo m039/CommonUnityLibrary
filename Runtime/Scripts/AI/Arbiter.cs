@@ -10,16 +10,40 @@ namespace m039.Common.AI
 
         IExpert[] _randomizer; // For selecting a random expert if the insistence is equal.
 
+        bool _isExecuting = false;
+
+        bool _neededCleanUp = false;
+
         public void Register(IExpert expert)
         {
             Assert.IsNotNull(expert);
-            _experts.Add(expert);
+            if (!_experts.Contains(expert))
+            {
+                _experts.Add(expert);
+            }
         }
 
         public void Unregister(IExpert expert)
         {
             Assert.IsNotNull(expert);
-            _experts.Remove(expert);
+            if (_isExecuting)
+            {
+                var index = _experts.IndexOf(expert);
+                if (index >= 0)
+                {
+                    _experts[index] = null;
+                    _neededCleanUp = true;
+                }
+            }
+            else
+            {
+                _experts.Remove(expert);
+            }
+        }
+
+        public void Clear()
+        {
+            _experts.Clear();
         }
 
         public void Iteration()
@@ -33,8 +57,12 @@ namespace m039.Common.AI
             int highestInsistence = 0;
             int randomizerIndex = 0;
 
-            foreach (IExpert expert in _experts)
+            for (int i = 0; i < _experts.Count; i++)
             {
+                var expert = _experts[i];
+                if (expert == null)
+                    continue;
+
                 int insistence = expert.GetInsistence();
                 if (insistence > highestInsistence)
                 {
@@ -53,9 +81,21 @@ namespace m039.Common.AI
                 _randomizer[Random.Range(0, randomizerIndex)]?.Execute();
             }
 
-            foreach (IExpert expert in _experts)
+            _isExecuting = true;
+            for (int i = 0; i < _experts.Count; i++)
             {
+                var expert = _experts[i];
+                if (expert == null)
+                    continue;
+
                 expert.AfterAllExecute();
+            }
+            _isExecuting = false;
+
+            if (_neededCleanUp)
+            {
+                _experts.RemoveAll(x => x == null);
+                _neededCleanUp = false;
             }
         }
     }
