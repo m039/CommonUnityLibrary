@@ -1,3 +1,4 @@
+using m039.Common.BehaviourTrees.Nodes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,11 @@ namespace m039.Common.BehaviourTrees
     public interface IHasName
     {
         string name { get; }
+    }
+
+    public interface IOnStartProccess
+    {
+        void OnStartProccess();
     }
 
     public interface INode
@@ -64,6 +70,24 @@ namespace m039.Common.BehaviourTrees
             {
                 ICompositeNode compositeNode => compositeNode.children,
                 _ => Empty.Value
+            };
+        }
+
+        public static bool GetLastProcessedStatus(this INode node)
+        {
+            return node switch
+            {
+                NodeBase nodeBase => nodeBase.lastProcessedStatus,
+                _ => false
+            };
+        }
+
+        public static Status GetLastStatus(this INode node)
+        {
+            return node switch
+            {
+                NodeBase nodeBase => nodeBase.lastStatus,
+                _ => Status.Success
             };
         }
     }
@@ -311,6 +335,11 @@ namespace m039.Common.BehaviourTrees
                 return Status.Failure;
             }
 
+            if (children[currentChild] is IOnStartProccess onStartProccess)
+            {
+                onStartProccess.OnStartProccess();
+            }
+
             var status = children[currentChild].Process();
             if (_policy(status))
             {
@@ -321,16 +350,34 @@ namespace m039.Common.BehaviourTrees
             return Status.Running;
         }
 
-        public void PrintTree()
+        public void PrintTree(int indentLevel = 0, StringBuilder sb = null)
         {
-            var sb = new StringBuilder();
-            PrintNode(this, 0, sb);
-            Debug.Log(sb.ToString());
+            if (sb == null)
+            {
+                sb = new();
+            }
+            PrintNode(this, indentLevel, sb);
         }
 
         static void PrintNode(INode node, int indentLevel, StringBuilder sb)
         {
-            sb.Append(' ', indentLevel * 2).AppendLine(node.GetName());
+            string format;
+
+            if (node.GetLastProcessedStatus())
+            {
+                format = node.GetLastStatus() switch
+                {
+                    Status.Success => "<color=\"green\">{0}</color>",
+                    Status.Failure => "<color=\"red\">{0}</color>",
+                    Status.Running => "{0} (RUNNING)",
+                    _ => "{0}"
+                };
+            } else
+            {
+                format = "{0}";
+            }
+
+            sb.Append(' ', indentLevel * 2).AppendLine(string.Format(format, node.GetName()));
 
             foreach (var child in node.GetChildren())
             {

@@ -44,6 +44,8 @@ namespace m039.Common.Blackboard
     [Serializable]
     public abstract class BlackboardEntry
     {
+        public abstract object GetValue();
+
         public abstract Type GetValueType();
 
         public abstract void Clear();
@@ -58,6 +60,8 @@ namespace m039.Common.Blackboard
         static BlackboardEntry() {
             s_IsReleasable = typeof(IReleasable).IsAssignableFrom(typeof(T));
         }
+
+        public override object GetValue() => Value;
 
         public override Type GetValueType()
         {
@@ -118,6 +122,11 @@ namespace m039.Common.Blackboard
         static readonly Dictionary<Type, Queue<BlackboardEntry>> s_EntryCache = new();
 
         readonly Dictionary<BlackboardKey, BlackboardEntry> _entries = new();
+
+        public Dictionary<BlackboardKey, BlackboardEntry>.Enumerator GetEnumerator()
+        {
+            return _entries.GetEnumerator();
+        }
 
         public T GetValueRaw<T>(BlackboardKey key, T @default)
         {

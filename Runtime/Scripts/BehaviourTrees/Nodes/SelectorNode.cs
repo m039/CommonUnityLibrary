@@ -6,7 +6,7 @@ namespace m039.Common.BehaviourTrees.Nodes
 {
     public class SelectorNode : CompositeNodeBase
     {
-        public override Status Process()
+        protected override Status OnProcess()
         {
             for (; currentChild < children.Count; currentChild++)
             {

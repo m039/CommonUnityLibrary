@@ -8,7 +8,7 @@ namespace m039.Common.BehaviourTrees.Nodes
         [SerializeField]
         UnityEvent _Event;
 
-        public override Status Process()
+        protected override Status OnProcess()
         {
             _Event?.Invoke();
             return Status.Success;

@@ -22,7 +22,7 @@ namespace m039.Common.BehaviourTrees.Nodes
             children.Add(node);
         }
 
-        public override Status Process() => children[currentChild].Process();
+        protected override Status OnProcess() => children[currentChild].Process();
 
         protected override void OnReset()
         {
@@ -30,6 +30,19 @@ namespace m039.Common.BehaviourTrees.Nodes
             for (int i = 0; i < children.Count; i++)
             {
                 children[i].Reset();
+            }
+        }
+
+        public override void OnStartProccess()
+        {
+            base.OnStartProccess();
+
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (children[i] is IOnStartProccess onStartProcess)
+                {
+                    onStartProcess.OnStartProccess();
+                }
             }
         }
     }

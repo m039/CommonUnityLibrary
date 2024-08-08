@@ -1,7 +1,8 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace m039.Common.BehaviourTrees.Nodes {
-    public class InverseNode : NodeBase
+    public class InverseNode : NodeBase, ICompositeNode
     {
         #region Inspector
 
@@ -10,7 +11,18 @@ namespace m039.Common.BehaviourTrees.Nodes {
 
         #endregion
 
-        public override Status Process()
+        readonly NodeBase[] _childs = new NodeBase[1];
+
+        public IList<INode> children
+        {
+            get
+            {
+                _childs[0] = _Child;
+                return _childs;
+            }
+        }
+
+        protected override Status OnProcess()
         {
             if (_Child == null)
             {
@@ -25,6 +37,16 @@ namespace m039.Common.BehaviourTrees.Nodes {
                     return Status.Success;
                 default:
                     return Status.Running;
+            }
+        }
+
+        public override void OnStartProccess()
+        {
+            base.OnStartProccess();
+
+            if (_Child is IOnStartProccess onStartProcess)
+            {
+                onStartProcess.OnStartProccess();
             }
         }
     }

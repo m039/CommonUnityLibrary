@@ -2,7 +2,7 @@ namespace m039.Common.BehaviourTrees.Nodes
 {
     public class SequenceNode : CompositeNodeBase
     {
-        public override Status Process()
+        protected override Status OnProcess()
         {
             for (; currentChild < children.Count; currentChild++)
             {
