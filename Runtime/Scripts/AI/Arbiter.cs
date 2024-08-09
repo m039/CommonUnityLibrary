@@ -88,7 +88,7 @@ namespace m039.Common.AI
                 if (expert == null)
                     continue;
 
-                expert.AfterAllExecute();
+                expert.LateExecute();
             }
             _isExecuting = false;
 

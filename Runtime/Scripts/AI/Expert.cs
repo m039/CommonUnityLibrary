@@ -4,6 +4,11 @@ namespace m039.Common.AI
     {
         int GetInsistence();
         void Execute();
-        void AfterAllExecute();
+
+        /// <summary>
+        /// Executes after the arbiter calls <see cref="Execute"> on an expert with highest insistence.
+        /// Use this method to clean up resources.
+        /// </summary>
+        void LateExecute();
     }
 }

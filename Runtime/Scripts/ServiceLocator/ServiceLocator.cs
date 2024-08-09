@@ -110,6 +110,11 @@ namespace m039.Common
             return this;
         }
 
+        public ServiceLocator Unregister<T>(T _)
+        {
+            return Unregister<T>();
+        }
+
         public ServiceLocator Unregister<T>()
         {
             return Unregister<T>(0);

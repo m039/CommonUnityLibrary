@@ -356,10 +356,10 @@ namespace m039.Common.BehaviourTrees
             {
                 sb = new();
             }
-            PrintNode(this, indentLevel, sb);
+            PrintNode(this, indentLevel, sb, true);
         }
 
-        static void PrintNode(INode node, int indentLevel, StringBuilder sb)
+        static void PrintNode(INode node, int indentLevel, StringBuilder sb, bool init)
         {
             string format;
 
@@ -369,7 +369,7 @@ namespace m039.Common.BehaviourTrees
                 {
                     Status.Success => "<color=\"green\">{0}</color>",
                     Status.Failure => "<color=\"red\">{0}</color>",
-                    Status.Running => "{0} (RUNNING)",
+                    Status.Running => "<color=\"yellow\">{0}</color>",
                     _ => "{0}"
                 };
             } else
@@ -377,11 +377,16 @@ namespace m039.Common.BehaviourTrees
                 format = "{0}";
             }
 
+            if (init)
+            {
+                format += ":";
+            }
+
             sb.Append(' ', indentLevel * 2).AppendLine(string.Format(format, node.GetName()));
 
             foreach (var child in node.GetChildren())
             {
-                PrintNode(child, indentLevel + 1, sb);
+                PrintNode(child, indentLevel + 1, sb, false);
             }
         }
     }
