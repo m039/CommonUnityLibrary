@@ -102,4 +102,38 @@ public class BasicTest
 
         Assert.IsTrue(completed);
     }
+
+    [UnityTest]
+    public IEnumerator TimerWithEnumeratorPasses()
+    {
+        var timerTest = new GameObject().AddComponent<TimerTest>();
+        Assert.IsFalse(timerTest.isFinished);
+        yield return new WaitForSeconds(1.1f);
+        Assert.IsTrue(timerTest.isFinished);
+    }
+
+    class TimerTest : MonoBehaviour
+    {
+        Timer _timer;
+
+        bool _started;
+
+        public bool isFinished { get; private set; }
+
+        private void Awake()
+        {
+            _timer = new CountdownTimer(1);
+            _timer.onStart += () => _started = true;
+            _timer.onStop += () => isFinished = true;
+            Assert.IsFalse(_started);
+            Assert.IsFalse(isFinished);
+            _timer.Start();
+            Assert.IsTrue(_started);
+        }
+
+        void Update()
+        {
+            _timer.Tick(Time.deltaTime);
+        }
+    }
 }
