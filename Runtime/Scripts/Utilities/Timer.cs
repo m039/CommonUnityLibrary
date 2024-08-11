@@ -10,7 +10,7 @@ namespace m039.Common
 
         public bool isRunning { get; protected set; }
 
-        public float progress => time / initialTime;
+        public virtual float progress => time / initialTime;
 
         public Action onStart = delegate { };
 
@@ -65,6 +65,8 @@ namespace m039.Common
 
     public class CountdownTimer : Timer
     {
+        public override float progress => 1 - time / initialTime;
+
         public CountdownTimer(float initialTime) : base(initialTime)
         {
         }
