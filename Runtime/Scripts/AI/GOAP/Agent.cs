@@ -22,11 +22,14 @@ namespace m039.Common.GOAP
 
         readonly Planner _planner = new();
 
+        bool _planUpdated;
+
         public void Update()
         {
-#if false
-            if (CalculatePlan())
+            if (_planUpdated)
             {
+                _planUpdated = false;
+
                 if (_actionPlan != null && _actionPlan.actions.Count > 0)
                 {
                     var newAction = _actionPlan.actions.Pop();
@@ -43,7 +46,6 @@ namespace m039.Common.GOAP
                     }
                 }
             }
-#endif
 
             if (_currentAction != null)
             {
@@ -68,6 +70,7 @@ namespace m039.Common.GOAP
 
             if (_actionPlan != null && _actionPlan.actions.Count > 0 && _currentAction == null)
             {
+                _planUpdated = false;
                 _currentAction = _actionPlan.actions.Pop();
 
                 if (_currentAction.preconditions.All(p => p.Evaluate()))
@@ -89,7 +92,7 @@ namespace m039.Common.GOAP
             _actionPlan = null;
         }
 
-        bool CalculatePlan()
+        public void CalculatePlan()
         {
             var priorityLevel = _currentGoal?.priority ?? 0;
 
@@ -104,10 +107,8 @@ namespace m039.Common.GOAP
             if (potentialPlan != null)
             {
                 _actionPlan = potentialPlan;
-                return true;
+                _planUpdated = true;
             }
-
-            return false;
         }
     }
 
