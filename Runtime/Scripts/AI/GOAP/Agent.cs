@@ -24,6 +24,27 @@ namespace m039.Common.GOAP
 
         public void Update()
         {
+#if false
+            if (CalculatePlan())
+            {
+                if (_actionPlan != null && _actionPlan.actions.Count > 0)
+                {
+                    var newAction = _actionPlan.actions.Pop();
+
+                    if (_currentAction != null && _currentAction != newAction)
+                    {
+                        _currentAction.Stop();
+                    }
+
+                    if (_currentAction == null || _currentAction != newAction)
+                    {
+                        _currentAction = newAction;
+                        _currentAction.Start();
+                    }
+                }
+            }
+#endif
+
             if (_currentAction != null)
             {
                 if (_currentAction.complete)
@@ -68,7 +89,7 @@ namespace m039.Common.GOAP
             _actionPlan = null;
         }
 
-        void CalculatePlan()
+        bool CalculatePlan()
         {
             var priorityLevel = _currentGoal?.priority ?? 0;
 
@@ -83,7 +104,10 @@ namespace m039.Common.GOAP
             if (potentialPlan != null)
             {
                 _actionPlan = potentialPlan;
+                return true;
             }
+
+            return false;
         }
     }
 

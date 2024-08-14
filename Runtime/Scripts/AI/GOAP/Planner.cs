@@ -63,17 +63,11 @@ namespace m039.Common.GOAP
                     if (FindPath(newNode, newAvailableActions))
                     {
                         parent.leaves.Add(newNode);
-                        newRequiredEffects.ExceptWith(newNode.action.preconditions);
-                    }
-
-                    if (newRequiredEffects.Count == 0)
-                    {
-                        return true;
                     }
                 }
             }
 
-            return false;
+            return parent.leaves.Count > 0;
         }
 
         class Node
