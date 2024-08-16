@@ -1,13 +1,16 @@
 
+using System;
 using System.Collections.Generic;
 
 namespace m039.Common.GOAP
 {
     public class AgentGoal
     {
+        private System.Func<float> _priority = delegate {  return 0f; };
+
         public string name { get; }
 
-        public float priority { get; private set; }
+        public float priority => _priority();
 
         public HashSet<AgentBelief> desiredEffects { get; } = new();
 
@@ -27,7 +30,12 @@ namespace m039.Common.GOAP
 
             public Builder WithPriority(float priority)
             {
-                goal.priority = priority;
+                return WithPriority(() => priority);
+            }
+
+            public Builder WithPriority(Func<float> priority)
+            {
+                goal._priority = priority;
                 return this;
             }
 
