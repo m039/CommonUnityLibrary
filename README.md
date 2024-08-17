@@ -8,13 +8,14 @@ You can find examples of how to use this library in [Common Unity Samples](https
 
 * AI:
   * Goal-Oriented Action Planning
-  * Hierarchical state machine
-  * Behaviour trees
+  * Hierarchical State Machine
+  * Behaviour Trees
+  * A\* Pathfinding 
 * Singletons
 * Logger
-* Event buses
+* Event Buses
 * Dependency Injection
-* Service locator
+* Service Locator
 * Blackboard
 * Attributes
 * Easings
