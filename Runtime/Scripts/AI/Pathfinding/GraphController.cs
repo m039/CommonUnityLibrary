@@ -133,6 +133,7 @@ namespace m039.Common.Pathfindig
         }
     }
 
+#if UNITY_EDITOR
     [CustomEditor(typeof(GraphController), true)]
     public class GraphControllerEditor : Editor
     {
@@ -259,5 +260,6 @@ namespace m039.Common.Pathfindig
             Handles.DrawLines(lines);
         }
     }
+#endif
 
 }
