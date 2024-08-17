@@ -17,7 +17,7 @@ namespace m039.Common.Pathfindig
 
         IGraphController _graphController;
 
-        private void Awake()
+        void Awake()
         {
             _graphController = GetComponent<IGraphController>();
             Assert.IsNotNull(_graphController);
@@ -53,7 +53,5 @@ namespace m039.Common.Pathfindig
         {
             return _pathfinder.Search(_graphController.GetNodeAt(v1), _graphController.GetNodeAt(v2));
         }
-
     }
-
 }
