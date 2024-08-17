@@ -6,13 +6,15 @@ You can find examples of how to use this library in [Common Unity Samples](https
 
 ## Features
 
+* AI:
+  * Goal-Oriented Action Planning
+  * Hierarchical state machine
+  * Behaviour trees
 * Singletons
 * Logger
 * Event buses
 * Dependency Injection
 * Service locator
-* Hierarchical state machine
-* Behaviour trees
 * Blackboard
 * Attributes
 * Easings
