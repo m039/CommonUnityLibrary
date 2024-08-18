@@ -129,6 +129,15 @@ namespace m039.Common.Pathfindig
 
         public virtual Color GetNodeColor(int x, int y)
         {
+            if (_graph != null)
+            {
+                Node node = _graph.GetNode(x, y);
+                if (node != null && node.type == NodeType.Blocked)
+                {
+                    return Color.blue;
+                }
+            }
+
             return Color.white;
         }
     }
