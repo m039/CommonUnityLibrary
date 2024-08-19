@@ -117,12 +117,12 @@ namespace m039.Common.Pathfindig
                 );
         }
 
-        protected float GetCellWidth()
+        public float GetCellWidth()
         {
             return width / columns;
         }
 
-        protected float GetCellHeight()
+        public float GetCellHeight()
         {
             return height / rows;
         }

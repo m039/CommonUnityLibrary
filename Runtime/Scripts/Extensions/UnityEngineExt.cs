@@ -55,6 +55,31 @@ namespace m039.Common
             return vector;
         }
 
+        public static Color With(this Color color, float? r = null, float? g = null, float? b = null, float? a = null)
+        {
+            if (r != null)
+            {
+                color.r = r.Value;
+            }
+
+            if (g != null)
+            {
+                color.g = g.Value;
+            }
+
+            if (b != null)
+            {
+                color.b = b.Value;
+            }
+
+            if (a != null)
+            {
+                color.a = a.Value;
+            }
+
+            return color;
+        }
+
         public static string GetPath(this Transform current)
         {
             if (current == null)

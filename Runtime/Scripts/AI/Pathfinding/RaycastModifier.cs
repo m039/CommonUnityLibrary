@@ -10,6 +10,8 @@ namespace m039.Common.Pathfindig
 
     public class RaycastModifier : MonoBehaviour, IModifier
     {
+        static List<Vector3> s_Buffer = new List<Vector3>();
+
         #region Inspector
 
         public bool thickRaycast;
@@ -22,10 +24,21 @@ namespace m039.Common.Pathfindig
 
         #endregion
 
-        static List<Vector3> buffer = new List<Vector3>();
+        private void OnEnable()
+        {
+            // noop
+        }
+
+        private void OnDisable()
+        {
+            // noop
+        }
 
         public void Apply(Path p)
-        { 
+        {
+            if (!enabled)
+                return;
+
             var points = p.vectorPath;
 
             if (ValidateLine(p.vectorPath[0], p.vectorPath[p.vectorPath.Count - 1]))
@@ -52,7 +65,7 @@ namespace m039.Common.Pathfindig
             while (startIndex < points.Count)
             {
                 Vector3 start = points[startIndex];
-                buffer.Add(start);
+                s_Buffer.Add(start);
 
                 int mn = 1, mx = 2;
                 while (true)
@@ -87,8 +100,8 @@ namespace m039.Common.Pathfindig
                 startIndex += mn;
             }
 
-            Swap(ref buffer, ref points);
-            buffer.Clear();
+            Swap(ref s_Buffer, ref points);
+            s_Buffer.Clear();
             return points;
         }
 
