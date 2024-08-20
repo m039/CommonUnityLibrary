@@ -3,6 +3,9 @@ using System;
 
 namespace m039.Common.Pathfindig
 {
+    /// <summary>
+    /// The implementation is based on <see href="https://visualstudiomagazine.com/articles/2012/11/01/priority-queues-with-c.aspx">this article</see> 
+    /// </summary>
     public class PriorityQueue<T> where T : IComparable<T>
     {
 
