@@ -8,6 +8,8 @@ namespace m039.Common.Pathfindig
     /// </summary>
     public class PriorityQueue<T> where T : IComparable<T>
     {
+        /// <see href="https://en.wikipedia.org/wiki/D-ary_heap"/>
+        const int D = 4;
 
         readonly List<T> _data;
 
@@ -15,7 +17,7 @@ namespace m039.Common.Pathfindig
 
         public PriorityQueue()
         {
-            _data = new List<T>();
+            _data = new List<T>(128);
         }
 
         public void Enqueue(T item)
@@ -26,7 +28,7 @@ namespace m039.Common.Pathfindig
 
             while (childIndex > 0)
             {
-                int parentIndex = (childIndex - 1) / 2;
+                int parentIndex = (childIndex - 1) / D;
 
                 if (_data[childIndex].CompareTo(_data[parentIndex]) >= 0)
                 {
@@ -55,29 +57,35 @@ namespace m039.Common.Pathfindig
 
             while (true)
             {
-                int childIndex = parentIndex * 2 + 1;
+                int leftChild = parentIndex * D + 1;
 
-                if (childIndex > lastIndex)
+                if (leftChild > lastIndex)
                 {
                     break;
                 }
 
-                int rightChild = childIndex + 1;
+                for (int i = 2; i <= D; i++)
+                {
+                    var rightChild = parentIndex * D + i;
+                    if (rightChild > lastIndex)
+                        break;
 
-                if (rightChild <= lastIndex && _data[rightChild].CompareTo(_data[childIndex]) < 0) {
-                    childIndex = rightChild;
+                    if (_data[rightChild].CompareTo(_data[leftChild]) < 0)
+                    {
+                        leftChild = rightChild;
+                    }
                 }
 
-                if (_data[parentIndex].CompareTo(_data[childIndex]) <= 0)
+                if (_data[parentIndex].CompareTo(_data[leftChild]) <= 0)
                 {
                     break;
                 }
 
                 T tmp = _data[parentIndex];
-                _data[parentIndex] = _data[childIndex];
-                _data[childIndex] = tmp;
+                _data[parentIndex] = _data[leftChild];
+                _data[leftChild] = tmp;
 
-                parentIndex = childIndex;
+                parentIndex = leftChild;
             }
 
             return frontItem;

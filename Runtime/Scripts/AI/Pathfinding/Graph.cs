@@ -88,7 +88,7 @@ namespace m039.Common.Pathfindig
 
         Node[] GetNeighbors(int x, int y, Node[,] nodeArray, Vector2Int[] directions)
         {
-            List<Node> neighborNodes = new List<Node>();
+            List<Node> neighborNodes = new();
 
             foreach (Vector2Int dir in directions)
             {
