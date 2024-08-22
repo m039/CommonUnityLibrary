@@ -5,9 +5,9 @@ namespace m039.Common.Pathfindig
 {
     public class Graph
     {
-        int _width;
+        readonly int _width;
 
-        int _height;
+        readonly int _height;
 
         float _cellWidth;
 
@@ -15,13 +15,13 @@ namespace m039.Common.Pathfindig
 
         float _cellDiagonal;
 
-        Node[,] _nodes;
+        readonly Node[,] _nodes;
 
-        public int Width { get { return _width; } }
+        public int Width => _width;
 
-        public int Height { get { return _height; } }
+        public int Height => _height;
 
-        public static readonly Vector2Int[] allDirections = {
+        static readonly Vector2Int[] AllDirections = {
             new Vector2Int(0, 1),
             new Vector2Int(1, 1),
             new Vector2Int(1, 0),
@@ -83,7 +83,7 @@ namespace m039.Common.Pathfindig
 
         Node[] GetNeighbors(int x, int y)
         {
-            return GetNeighbors(x, y, _nodes, allDirections);
+            return GetNeighbors(x, y, _nodes, AllDirections);
         }
 
         Node[] GetNeighbors(int x, int y, Node[,] nodeArray, Vector2Int[] directions)

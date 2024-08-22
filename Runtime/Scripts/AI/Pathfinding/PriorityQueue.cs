@@ -11,7 +11,7 @@ namespace m039.Common.Pathfindig
 
         readonly List<T> _data;
 
-        public int Count { get { return _data.Count; } }
+        public int Count => _data.Count;
 
         public PriorityQueue()
         {

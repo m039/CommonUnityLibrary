@@ -10,7 +10,7 @@ namespace m039.Common.Pathfindig
 
     public class RaycastModifier : MonoBehaviour, IModifier
     {
-        static List<Vector3> s_Buffer = new List<Vector3>();
+        static List<Vector3> s_Buffer = new();
 
         #region Inspector
 

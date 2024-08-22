@@ -11,7 +11,7 @@ namespace m039.Common.Pathfindig
 
     public class Pathfinder
     {
-        Graph _graph;
+        readonly Graph _graph;
 
         Node _startNode;
 
@@ -19,15 +19,17 @@ namespace m039.Common.Pathfindig
 
         const float GoalPriorityCoeff = 1f;
 
-        readonly PriorityQueue<Node> _frontierNodes = new PriorityQueue<Node>();
+        readonly PriorityQueue<Node> _frontierNodes = new();
 
         readonly BitArray _isExploredNodes;
 
         readonly BitArray _isFrontierNodes;
 
-        readonly List<IModifier> _modifiers = new List<IModifier>();
+        readonly List<IModifier> _modifiers = new();
 
         List<Node> _pathNodes;
+
+        public bool DiagonalsWalkable = false;
 
         internal Pathfinder(Graph graph)
         {
@@ -153,10 +155,11 @@ namespace m039.Common.Pathfindig
 
         Path CreatePath(List<Node> nodes)
         {
-            Path path = new Path();
-
-            path.path = nodes;
-            path.vectorPath = new List<Vector3>();
+            Path path = new()
+            {
+                path = nodes,
+                vectorPath = new List<Vector3>()
+            };
 
             if (nodes != null && nodes.Count > 0)
             {
@@ -177,6 +180,47 @@ namespace m039.Common.Pathfindig
             return path;
         }
 
+        /// To stay consistent, A* Pathfinding Project checks if diagonals are blocked.
+        bool CheckIfDiagonalsWalkable(Node node, Node neighbor)
+        {
+            if (DiagonalsWalkable)
+                return true;
+
+            var dx = neighbor.xIndex - node.xIndex;
+            var dy = neighbor.yIndex - node.yIndex;
+
+            bool isBlocked(int dx, int dy)
+            {
+                var newX = node.xIndex + dx;
+                var newY = node.yIndex + dy;
+                return newX >= 0 && newX < _graph.Width &&
+                    newY >= 0 && newY < _graph.Height &&
+                    _graph.GetNode(newX, newY).type == NodeType.Blocked;
+            }
+
+            if (dx == 1 && dy == 1)
+            {
+                return !(isBlocked(0, 1) && isBlocked(1, 0));
+            }
+
+            if (dx == 1 && dy == -1)
+            {
+                return !(isBlocked(1, 0) && isBlocked(0, -1));
+            }
+
+            if (dx == -1 && dy == 1)
+            {
+                return !(isBlocked(-1, 0) && isBlocked(0, 1));
+            }
+
+            if (dx == -1 && dy == -1)
+            {
+                return !(isBlocked(-1, 0) && isBlocked(0, -1));
+            }
+
+            return true;
+        }
+
         void ExpandFrontier(Node node)
         {
             if (node != null)
@@ -184,6 +228,8 @@ namespace m039.Common.Pathfindig
                 for (int i = 0; i < node.neighbors.Length; i++)
                 {
                     var neighbor = node.neighbors[i];
+                    if (!CheckIfDiagonalsWalkable(node, neighbor))
+                        continue;
 
                     if (!IsExplored(neighbor))
                     {
@@ -212,17 +258,20 @@ namespace m039.Common.Pathfindig
         {
             if (endNode != null)
             {
-                List<Node> path = new List<Node>();
-
-                path.Add(endNode);
+                List<Node> path = new()
+                {
+                    endNode
+                };
 
                 Node currentNode = endNode.previous;
 
-                while (currentNode.previous != null)
+                while (currentNode != null)
                 {
-                    path.Insert(0, currentNode);
+                    path.Add(currentNode);
                     currentNode = currentNode.previous;
                 }
+
+                path.Reverse();
 
                 return path;
             }
