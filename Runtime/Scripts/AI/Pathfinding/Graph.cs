@@ -17,7 +17,8 @@ namespace m039.Common.Pathfindig
 
         readonly Node[,] _nodes;
 
-        readonly bool _diagonalsWalkable = false;
+        /// To stay consistent, A* Pathfinding Project checks if diagonals are blocked.
+        readonly bool _diagonalWalkable = false;
 
         public int Width => _width;
 
@@ -34,14 +35,14 @@ namespace m039.Common.Pathfindig
             new Vector2Int(-1, 1)
         };
 
-        public Graph(IGraphController graphController, int[,] values, bool diagonalsWalkable = false)
+        public Graph(IGraphController graphController, int[,] values, bool diagonalWalkable = false)
         {
             _width = values.GetLength(0);
             _height = values.GetLength(1);
             SetAspectRatio(graphController.Width / graphController.Height);
 
             _nodes = new Node[_width, _height];
-            _diagonalsWalkable = diagonalsWalkable;
+            _diagonalWalkable = diagonalWalkable;
 
             for (int y = 0; y < _height; y++)
             {
@@ -101,7 +102,7 @@ namespace m039.Common.Pathfindig
                 if (IsWithinBounds(newX, newY) &&
                     nodeArray[newX, newY] != null &&
                     nodeArray[newX, newY].type != NodeType.Blocked &&
-                    CheckIfDiagonalsWalkable(x, y, newX, newY))
+                    IsDiagonalWalkable(x, y, newX, newY))
                 {
                     neighborNodes.Add(nodeArray[newX, newY]);
                 }
@@ -110,10 +111,9 @@ namespace m039.Common.Pathfindig
             return neighborNodes.ToArray();
         }
 
-        /// To stay consistent, A* Pathfinding Project checks if diagonals are blocked.
-        bool CheckIfDiagonalsWalkable(int nodeX, int nodeY, int neighborX, int neighborY)
+        bool IsDiagonalWalkable(int nodeX, int nodeY, int neighborX, int neighborY)
         {
-            if (_diagonalsWalkable)
+            if (_diagonalWalkable)
                 return true;
 
             var dx = neighborX - nodeX;

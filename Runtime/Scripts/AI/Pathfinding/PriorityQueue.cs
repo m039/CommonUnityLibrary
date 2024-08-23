@@ -112,25 +112,6 @@ namespace m039.Common.Pathfindig
             return frontItem;
         }
 
-#if false
-        public T Peek()
-        {
-            T frontItem = _data[0];
-            return frontItem;
-        }
-
-        public bool Contains(T item)
-        {
-            for (int i = 0; i < _length; i++)
-            {
-                if (_data[i] != null && _data[i].Equals(item))
-                    return true;
-            }
-
-            return false;
-        }
-#endif
-
         public IEnumerable<T> GetEnumerable()
         {
             for (int i = 0; i < _length;i++)
