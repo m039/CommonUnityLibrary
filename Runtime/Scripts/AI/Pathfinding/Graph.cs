@@ -17,6 +17,8 @@ namespace m039.Common.Pathfindig
 
         readonly Node[,] _nodes;
 
+        readonly bool _diagonalsWalkable = false;
+
         public int Width => _width;
 
         public int Height => _height;
@@ -32,13 +34,14 @@ namespace m039.Common.Pathfindig
             new Vector2Int(-1, 1)
         };
 
-        public Graph(IGraphController graphController, int[,] values)
+        public Graph(IGraphController graphController, int[,] values, bool diagonalsWalkable = false)
         {
             _width = values.GetLength(0);
             _height = values.GetLength(1);
             SetAspectRatio(graphController.Width / graphController.Height);
 
             _nodes = new Node[_width, _height];
+            _diagonalsWalkable = diagonalsWalkable;
 
             for (int y = 0; y < _height; y++)
             {
@@ -97,13 +100,55 @@ namespace m039.Common.Pathfindig
 
                 if (IsWithinBounds(newX, newY) &&
                     nodeArray[newX, newY] != null &&
-                    nodeArray[newX, newY].type != NodeType.Blocked)
+                    nodeArray[newX, newY].type != NodeType.Blocked &&
+                    CheckIfDiagonalsWalkable(x, y, newX, newY))
                 {
                     neighborNodes.Add(nodeArray[newX, newY]);
                 }
             }
 
             return neighborNodes.ToArray();
+        }
+
+        /// To stay consistent, A* Pathfinding Project checks if diagonals are blocked.
+        bool CheckIfDiagonalsWalkable(int nodeX, int nodeY, int neighborX, int neighborY)
+        {
+            if (_diagonalsWalkable)
+                return true;
+
+            var dx = neighborX - nodeX;
+            var dy = neighborY - nodeY;
+
+            bool isBlocked(int dx, int dy)
+            {
+                var newX = nodeX + dx;
+                var newY = nodeY + dy;
+                return newX >= 0 && newX < Width &&
+                    newY >= 0 && newY < Height &&
+                    GetNode(newX, newY).type == NodeType.Blocked;
+            }
+
+            if (dx == 1 && dy == 1)
+            {
+                return !(isBlocked(0, 1) && isBlocked(1, 0));
+            }
+
+            if (dx == 1 && dy == -1)
+            {
+                return !(isBlocked(1, 0) && isBlocked(0, -1));
+            }
+
+            if (dx == -1 && dy == 1)
+            {
+                return !(isBlocked(-1, 0) && isBlocked(0, 1));
+            }
+
+            if (dx == -1 && dy == -1)
+            {
+                return !(isBlocked(-1, 0) && isBlocked(0, -1));
+            }
+
+            return true;
         }
 
         public bool IsWithinBounds(int x, int y)
