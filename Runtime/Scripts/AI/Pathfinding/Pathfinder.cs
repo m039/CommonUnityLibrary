@@ -227,14 +227,13 @@ namespace m039.Common.Pathfindig
                 for (int i = 0; i < node.neighbors.Length; i++)
                 {
                     var neighbor = node.neighbors[i];
+                    if (!CheckIfDiagonalsWalkable(node, neighbor))
+                    {
+                        continue;
+                    }
+
                     if (!IsExplored(neighbor))
                     {
-                        if (!CheckIfDiagonalsWalkable(node, neighbor))
-                        {
-                            SetExplored(neighbor, true);
-                            continue;
-                        }
-
                         float distanceToNeighbor = _graph.GetNodeDistance(node, neighbor);
                         float newDistanceTraveled = distanceToNeighbor + node.distanceTraveled;
 
