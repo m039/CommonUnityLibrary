@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,9 +20,9 @@ namespace m039.Common.Pathfindig
 
         readonly PriorityQueue<Node> _frontierNodes = new();
 
-        readonly BitArray _isExploredNodes;
+        readonly bool[] _isExploredNodes;
 
-        readonly BitArray _isFrontierNodes;
+        readonly bool[] _isFrontierNodes;
 
         readonly List<IModifier> _modifiers = new();
 
@@ -34,8 +33,8 @@ namespace m039.Common.Pathfindig
         internal Pathfinder(Graph graph)
         {
             _graph = graph;
-            _isExploredNodes = new BitArray(_graph.Width * _graph.Height);
-            _isFrontierNodes = new BitArray(_graph.Width * _graph.Height);
+            _isExploredNodes = new bool[_graph.Width * _graph.Height];
+            _isFrontierNodes = new bool[_graph.Width * _graph.Height];
         }
 
         public Path Search(Node start, Node goal)
@@ -56,12 +55,13 @@ namespace m039.Common.Pathfindig
                 return null;
             }
 
+            _pathNodes = null;
             _startNode = start;
             _goalNode = goal;
 
             _frontierNodes.Clear();
-            _isExploredNodes.SetAll(false);
-            _isFrontierNodes.SetAll(false);
+            System.Array.Clear(_isExploredNodes, 0, _isExploredNodes.Length);
+            System.Array.Clear(_isFrontierNodes, 0, _isFrontierNodes.Length);
 
             Enqueue(_startNode);
 
@@ -90,7 +90,6 @@ namespace m039.Common.Pathfindig
                         _pathNodes = GetPathNodes(_goalNode);
                         break;
                     }
-
                 }
                 else
                 {
@@ -138,14 +137,14 @@ namespace m039.Common.Pathfindig
             SetValue(_isFrontierNodes, node, value);
         }
 
-        bool Contains(BitArray bitArray, Node node)
+        bool Contains(bool[] array, Node node)
         {
-            return bitArray[_graph.Width * node.yIndex + node.xIndex];
+            return array[_graph.Width * node.yIndex + node.xIndex];
         }
 
-        void SetValue(BitArray bitArray, Node node, bool value)
+        void SetValue(bool[] array, Node node, bool value)
         {
-            bitArray[_graph.Width * node.yIndex + node.xIndex] = value;
+            array[_graph.Width * node.yIndex + node.xIndex] = value;
         }
 
         public void AddModifier(IModifier modifier)
@@ -228,11 +227,14 @@ namespace m039.Common.Pathfindig
                 for (int i = 0; i < node.neighbors.Length; i++)
                 {
                     var neighbor = node.neighbors[i];
-                    if (!CheckIfDiagonalsWalkable(node, neighbor))
-                        continue;
-
                     if (!IsExplored(neighbor))
                     {
+                        if (!CheckIfDiagonalsWalkable(node, neighbor))
+                        {
+                            SetExplored(neighbor, true);
+                            continue;
+                        }
+
                         float distanceToNeighbor = _graph.GetNodeDistance(node, neighbor);
                         float newDistanceTraveled = distanceToNeighbor + node.distanceTraveled;
 

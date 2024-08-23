@@ -1,9 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using m039.Common.Pathfindig;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
 
 public class PathfindingTest
 {
@@ -23,7 +20,7 @@ public class PathfindingTest
             {
                 var front = queue.Dequeue();
 
-                foreach (var item in queue.ToList())
+                foreach (var item in queue.GetEnumerable())
                 {
                     Assert.IsTrue(item >= front);
                 }

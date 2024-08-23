@@ -11,20 +11,28 @@ namespace m039.Common.Pathfindig
         /// <see href="https://en.wikipedia.org/wiki/D-ary_heap"/>
         const int D = 4;
 
-        readonly List<T> _data;
+        public float growthFactor = 2;
 
-        public int Count => _data.Count;
+        public int Count => _length;
 
-        public PriorityQueue()
+        T[] _data;
+
+        int _length = 0;
+
+        public PriorityQueue(int capacity = 128)
         {
-            _data = new List<T>(128);
+            _data = new T[capacity];
         }
 
         public void Enqueue(T item)
         {
-            _data.Add(item);
+            if (_length == _data.Length)
+            {
+                Expand();
+            }
+            _data[_length++] = item;
 
-            int childIndex = _data.Count - 1;
+            int childIndex = _length - 1;
 
             while (childIndex > 0)
             {
@@ -43,14 +51,27 @@ namespace m039.Common.Pathfindig
             }
         }
 
+        void Expand()
+        {
+            int newSize = Math.Max(_data.Length + D, Math.Min(1 << 16, (int)Math.Round(_data.Length * growthFactor)));
+            if (newSize > (1 << 16))
+            {
+                throw new Exception("Binary Heap Size really large (>65536).");
+            }
+
+            var newData = new T[newSize];
+            _data.CopyTo(newData, 0);
+            _data = newData;
+        }
+
         public T Dequeue()
         {
-            int lastIndex = _data.Count - 1;
+            int lastIndex = _length - 1;
 
             T frontItem = _data[0];
 
             _data[0] = _data[lastIndex];
-            _data.RemoveAt(lastIndex);
+            _length--;
             lastIndex--;
 
             int parentIndex = 0;
@@ -91,6 +112,7 @@ namespace m039.Common.Pathfindig
             return frontItem;
         }
 
+#if false
         public T Peek()
         {
             T frontItem = _data[0];
@@ -99,17 +121,27 @@ namespace m039.Common.Pathfindig
 
         public bool Contains(T item)
         {
-            return _data.Contains(item);
-        }
+            for (int i = 0; i < _length; i++)
+            {
+                if (_data[i] != null && _data[i].Equals(item))
+                    return true;
+            }
 
-        public List<T> ToList()
+            return false;
+        }
+#endif
+
+        public IEnumerable<T> GetEnumerable()
         {
-            return _data;
+            for (int i = 0; i < _length;i++)
+            {
+                yield return _data[i];
+            }
         }
 
         public void Clear()
         {
-            _data.Clear();
+            _length = 0;
         }
     }
 }
