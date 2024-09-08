@@ -1,7 +1,7 @@
 {
   "name": "com.m039.common",
   "version": "0.2.1",
-  "displayName": "Common Unity Library",
+  "displayName": "Common Library",
   "description": "A library with common for all my projects code or assets",
   "unity": "2019.1",
   "keywords": [
